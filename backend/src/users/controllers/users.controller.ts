@@ -24,9 +24,8 @@ import { JwtAuthGuard } from '../../core/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../core/auth/guards/roles.guard';
 import { Role } from '../../core/auth/models/roles.model';
 import { FilterDto } from '../../core/interfaces/filter.dto';
-import { UserDto } from '../dtos/user.dto';
+import { UpdateUserDto, UserDto } from '../dtos/user.dto';
 import { UsersService } from '../services/users.service';
-import { UpdateUserDto } from '../dtos/update-user.dto';
 
 @Controller('users')
 @ApiTags('users')

@@ -62,18 +62,6 @@ export class MovementsController {
     return { movements: await this.movementsService.findAll(params) };
   }
 
-  //First router with static path
-  @Get('filter')
-  @Is_PublicD()
-  @ApiOperation({
-    summary: 'A static path',
-    description: 'First router with static path.\nEvite hit with parameter path :movementId',
-  })
-  @HttpCode(HttpStatus.OK)
-  getMovementFilter() {
-    return { message: `I'm a filter` };
-  }
-
   //Getting obj params: Can use  Param() params: any and params.movementId
   @Get(':movementId')
   @Is_PublicD()
@@ -86,19 +74,7 @@ export class MovementsController {
       movement: await this.movementsService.findOne(movementId),
     });
   }
-
-  @Get(':movementCode')
-  @Is_PublicD()
-  @ApiOperation({
-    summary: 'Get movement by movementCode',
-  })
-  @HttpCode(HttpStatus.OK)
-  async getMovementByCode(@Param('movementCode') movementCode: string) {
-    return {
-      movement: await this.movementsService.findOnebyCode(movementCode),
-    };
-  }
-
+  
   @Post()
   @HttpCode(HttpStatus.OK)
   @RoleD(Role.ADMIN)
