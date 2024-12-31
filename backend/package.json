@@ -31,8 +31,7 @@
     "migrations:revert": "npm run typeorm2 -- migration:revert -d src/core/database/data-source.ts",
     "migrations:log": "npm run typeorm2 -- migration:log -d src/core/database/data-source.ts",
     "migrations:clear": "npm run typeorm2 -- migration:clear -d src/core/database/data-source.ts",
-    "migrations:sync": "npm run typeorm2 -- migration:sync -d src/core/database/data-source.ts",
-    "prepare": "npx husky install"
+    "migrations:sync": "npm run typeorm2 -- migration:sync -d src/core/database/data-source.ts"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.0",
@@ -60,6 +59,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
+    "rxjs-compat": "^6.6.7",
     "swagger-ui-express": "^4.4.0",
     "typeorm": "^0.3.17"
   },

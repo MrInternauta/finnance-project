@@ -25,13 +25,13 @@ import { FilterDto } from '../../core/interfaces/filter.dto';
 import { ParseIntPipe } from '../../core/pipes/parse-int.pipe';
 import { CreateCategoryDto, UpdateCategoryDto } from '../dtos/category.dto';
 import { CategoriesService } from '../services/categories.service';
-import { ProductsService } from '../services/products.service';
+import { MovementsService } from '../services/movements.service';
 
 @Controller('categories')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('categories')
 export class CategoriesController {
-  constructor(private categoriesServices: CategoriesService, private productsServices: ProductsService) {}
+  constructor(private categoriesServices: CategoriesService, private productsServices: MovementsService) {}
 
   @Is_PublicD()
   @Get()

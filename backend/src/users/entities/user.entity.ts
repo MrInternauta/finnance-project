@@ -2,8 +2,8 @@ import { Exclude } from 'class-transformer';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { BasicEntity } from '../../core/interfaces/basic.entity';
-import { Order } from '../../orders/entities/order.entity';
 import { Role } from './role.entity';
+import { Product } from '../../movements/entities/movement.entity';
 
 @Entity()
 export class User extends BasicEntity {
@@ -35,6 +35,6 @@ export class User extends BasicEntity {
   })
   role: Role;
 
-  @OneToMany(() => Order, order => order.user, { nullable: true })
-  orders: Order[];
+  @OneToMany(() => Product, product => product.user)
+  products: Product[];
 }

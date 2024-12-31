@@ -3,30 +3,29 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { Between, FindOptionsWhere, Repository } from 'typeorm';
 
-import { CreateProductDto, UpdateProductDto } from '../../products/dtos/product.dto';
-import { ProductsFilterDto } from '../dtos/productFilter.dto';
-import { Product } from '../entities/product.entity';
+import { CreateMovementDto, UpdateMovementDto } from '../dtos/movement.dto';
+import { MovementsFilterDto } from '../dtos/movementFilter.dto';
+import { Product } from '../entities/movement.entity';
 import { CategoriesService } from './categories.service';
 
 @Injectable()
-export class ProductsService {
+export class MovementsService {
   constructor(
     @InjectRepository(Product) private productRepo: Repository<Product>,
     private categoryService: CategoriesService
   ) {}
 
-  public async findAll(params?: ProductsFilterDto) {
+  public async findAll(params?: MovementsFilterDto) {
     if (!params)
       return this.productRepo.find({
         relations: ['category'],
       });
     const where: FindOptionsWhere<Product> = {};
     const { limit, offset } = params;
-    const { minPrice, maxPrice } = params;
-
-    if (minPrice && maxPrice) {
-      where.price = Between(minPrice, maxPrice);
+    if (params?.name) {
+      where.name = params.name;
     }
+
 
     if (params?.categoryId) {
       where.category = { id: params.categoryId };
@@ -65,7 +64,6 @@ export class ProductsService {
 
   findOnebyCode(code: string) {
     return this.productRepo.find({
-      where: { code },
       take: 1,
       withDeleted: true,
     });
@@ -85,11 +83,9 @@ export class ProductsService {
     }
   }
 
-  public async create(payload: CreateProductDto) {
+  public async create(payload: CreateMovementDto) {
     try {
       await this.validateUniqueName(payload.name);
-      await this.validateUniqueCode(payload?.code);
-
       const product = this.productRepo.create(payload);
       if (payload.categoryId) {
         const categories = await this.categoryService.findById(payload.categoryId);
@@ -102,7 +98,7 @@ export class ProductsService {
     }
   }
 
-  public async update(id: number, payload: UpdateProductDto) {
+  public async update(id: number, payload: UpdateMovementDto) {
     try {
       if (payload?.name) {
         const productsItems = await this.findOnebyName(payload?.name);
@@ -124,24 +120,8 @@ export class ProductsService {
     }
   }
 
-  async withStock(productId: number, quantity: number) {
-    const product = await this.findOne(productId, false);
-    if (product.stock < quantity) {
-      throw new BadRequestException(`Product ${product.name} without ${quantity} of stock, just ${product.stock}`);
-    }
-    return product;
-  }
 
-  async quitStock(productId: number, quantity: number) {
-    const product = await this.findOne(productId, false);
-    product.stock = product.stock - quantity;
-    return this.productRepo.save(product);
-  }
-  async addStock(productId: number, quantity: number) {
-    const product = await this.findOne(productId, false);
-    product.stock = product.stock + quantity;
-    return this.productRepo.save(product);
-  }
+
 
   public async remove(id: number) {
     await this.findOne(id);
@@ -382,20 +362,7 @@ export class ProductsService {
       ['7500810011508', 'Chips fuego', 2, '', '', 1],
     ];
 
-    const defaultProduct: Array<CreateProductDto> = [];
-
-    products.map(product => {
-      defaultProduct.push({
-        code: product[0].toString(),
-        name: product[1].toString(),
-        stock: Number(product[2]),
-        image: '',
-        price: Math.floor(Math.random() * 100) + 1,
-        priceSell: Math.floor(Math.random() * 100) + 1,
-        description: ' Lorem ipsum description',
-        categoryId: null,
-      });
-    });
+    const defaultProduct: Array<CreateMovementDto> = [];
     return defaultProduct;
   }
 }

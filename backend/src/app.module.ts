@@ -10,8 +10,7 @@ import enviroments from './core/config/enviroments';
 import { DatabaseModule } from './core/database/database.module';
 import { AppController } from './home/app.controller';
 import { AppService } from './home/app.service';
-import { OrdersModule } from './orders/orders.module';
-import { ProductsModule } from './products/products.module';
+import { MovementsModule } from './movements/movements.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -37,10 +36,9 @@ import { UsersModule } from './users/users.module';
       }),
     }),
     DatabaseModule,
-    ProductsModule,
+    MovementsModule,
     UsersModule,
     HttpModule,
-    OrdersModule,
     AuthModule,
   ],
   providers: [AppService],

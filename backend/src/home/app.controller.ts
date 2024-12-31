@@ -74,11 +74,7 @@ export class AppController {
     )
     file
   ) {
-    if (type == 'product') {
-      return this.appService.updateImgeProduct(id, res, file);
-    } else {
-      return this.appService.updateImgeUser(id, res, file);
-    }
+    return this.appService.updateImgeUser(id, res, file);
   }
 
   @Get('image/:type/:img')

@@ -2,14 +2,14 @@ services:
   app:
     env_file:
       - .env
-    container_name: node_app_dev
+    container_name: node_dev_finnance
     command: npm run start:debug
     networks:   # Use a custom network
       - devred
     ports:
       - 3000:3000
-  postgres_service:
-    container_name: postgres_dev
+  postgres_service_finnance:
+    container_name: postgres_dev_finnance
     env_file:
       - .env
     networks:   # Use a custom network

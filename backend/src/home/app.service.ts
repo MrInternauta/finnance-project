@@ -6,8 +6,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { config } from '../config';
-import { CategoriesService } from '../products/services/categories.service';
-import { ProductsService } from '../products/services/products.service';
+import { CategoriesService } from '../movements/services/categories.service';
+import { MovementsService } from '../movements/services/movements.service';
 import { RolesService } from '../users/services/roles.service';
 import { UsersService } from '../users/services/users.service';
 
@@ -17,7 +17,7 @@ export class AppService {
     private rolesService: RolesService,
     private usersService: UsersService,
     private categoriesServices: CategoriesService,
-    private productsServices: ProductsService,
+    private productsServices: MovementsService,
     @Inject(config.KEY) private configService: ConfigType<typeof config>
   ) {}
 
@@ -126,37 +126,6 @@ export class AppService {
         const newUser = await this.usersService.update(Number(id), { ...user, image: nombreArchivo });
         delete newUser.password;
         res.json(newUser);
-      });
-    } catch (error) {
-      console.log(error);
-      throw new BadRequestException();
-    }
-  }
-
-  public async updateImgeProduct(id: number, res: Response, file) {
-    try {
-      this.imageValidations(file);
-      const nombreCortado = file?.originalname.split('.');
-      const extension = nombreCortado[nombreCortado.length - 1];
-      const product = await this.productsServices.findOne(id);
-      if (!product) {
-        throw new BadRequestException('Product was not found');
-      }
-      const nombreArchivo = `${id}.${extension}`;
-      this.removeFile(
-        path.join(__dirname, `../../${this.configService.IMAGES_PATH}/${'product'}/${product?.image}`),
-        'product'
-      );
-
-      const pathImagen = path.join(__dirname, `../../${this.configService.IMAGES_PATH}/${'product'}/${nombreArchivo}`);
-
-      fs.writeFile(pathImagen, file.buffer, async err => {
-        if (err) {
-          throw new BadRequestException('Error al actualizar');
-        }
-        console.log('The file was saved!', pathImagen);
-        const newProduct = await this.productsServices.update(Number(id), { ...product, image: nombreArchivo });
-        res.json(newProduct);
       });
     } catch (error) {
       console.log(error);

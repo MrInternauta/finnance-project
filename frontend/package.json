@@ -10,8 +10,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "prepare": "npx husky install"
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
   },
   "private": true,
   "dependencies": {
