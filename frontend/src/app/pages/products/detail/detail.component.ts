@@ -61,16 +61,16 @@ export class DetailComponent implements OnDestroy, OnInit {
   }
 
   ngOnInit(): void {
-    if (this.product) {
-      this.name = this.product?.name;
-      this.code = this.product?.code;
-      this.stock = this.product?.stock;
-      this.price = this.product?.price;
-      this.price_sell = this.product?.priceSell;
-      this.description = this.product?.description;
-      this.categoryId = this.product?.categoryId;
-      console.log(this.product);
-    }
+    // if (this.product) {
+    //   this.name = this.product?.name;
+    //   this.code = this.product?.code;
+    //   this.stock = this.product?.stock;
+    //   this.price = this.product?.price;
+    //   this.price_sell = this.product?.priceSell;
+    //   this.description = this.product?.description;
+    //   this.categoryId = this.product?.categoryId;
+    //   console.log(this.product);
+    // }
   }
 
   getImage() {
@@ -78,20 +78,20 @@ export class DetailComponent implements OnDestroy, OnInit {
       return;
     }
 
-    this.pictureService.changePicture(this.product?.id ?? '', 'product');
+    // this.pictureService.changePicture(this.product?.id ?? '', 'product');
   }
 
   getCategories() {
     this.subscriptionCategories$ = this.productService.getCategories().subscribe(categoriesResponse => {
-      this.categories =
-        categoriesResponse?.categories.map(item => {
-          return {
-            name: item.name,
-            value: item.id.toString(),
-            selected:
-              item.id?.toString()?.toLocaleLowerCase() === this.product?.category?.id?.toString()?.toLocaleLowerCase(),
-          };
-        }) || [];
+      // this.categories =
+      //   categoriesResponse?.categories.map(item => {
+      //     return {
+      //       name: item.name,
+      //       value: item.id.toString(),
+      //       selected:
+      //         item.id?.toString()?.toLocaleLowerCase() === this.product?.category?.id?.toString()?.toLocaleLowerCase(),
+      //     };
+      //   }) || [];
     });
   }
 
@@ -103,50 +103,50 @@ export class DetailComponent implements OnDestroy, OnInit {
   confirm() {
     this.fillEmptyForm();
 
-    if (!this.product || (this.product?.code && !this.product?.id)) {
-      const product: ArticleCreate = {
-        name: this.name,
-        code: this.code,
-        stock: this.stock,
-        price: this.price,
-        priceSell: this.price_sell,
-        description: this.description,
-        categoryId: this.categoryId,
-      };
+    // if (!this.product || (this.product?.code && !this.product?.id)) {
+    //   const product: ArticleCreate = {
+    //     name: this.name,
+    //     code: this.code,
+    //     stock: this.stock,
+    //     price: this.price,
+    //     priceSell: this.price_sell,
+    //     description: this.description,
+    //     categoryId: this.categoryId,
+    //   };
 
-      this.subscription$ = this.productService.postProduct(product).subscribe(
-        res => {
-          this.removeSubscription();
-          this.modalInfoService.success('El producto fue creado!', '');
-          return this.modalCtrl.dismiss(res, 'created');
-        },
-        error => {
-          console.log(error);
-        }
-      );
-      return;
-    }
+    //   this.subscription$ = this.productService.postProduct(product).subscribe(
+    //     res => {
+    //       this.removeSubscription();
+    //       this.modalInfoService.success('El producto fue creado!', '');
+    //       return this.modalCtrl.dismiss(res, 'created');
+    //     },
+    //     error => {
+    //       console.log(error);
+    //     }
+    //   );
+    //   return;
+    // }
 
-    const product: ArticleCreate = {
-      id: Number(this.product.id),
-      name: this.name,
-      code: this.code,
-      stock: this.stock,
-      price: this.price,
-      priceSell: this.price_sell,
-      description: this.description,
-      categoryId: this.categoryId,
-    };
-    this.subscription$ = this.productService.putProduct(this.product.id, product).subscribe(
-      res => {
-        this.removeSubscription();
-        this.modalInfoService.success('El producto fue actualizado!', '');
-        return this.modalCtrl.dismiss(res, 'updated');
-      },
-      error => {
-        console.log(error);
-      }
-    );
+    // const product: ArticleCreate = {
+    //   id: Number(this.product.id),
+    //   name: this.name,
+    //   code: this.code,
+    //   stock: this.stock,
+    //   price: this.price,
+    //   priceSell: this.price_sell,
+    //   description: this.description,
+    //   categoryId: this.categoryId,
+    // };
+    // this.subscription$ = this.productService.putProduct(this.product.id, product).subscribe(
+    //   res => {
+    //     this.removeSubscription();
+    //     this.modalInfoService.success('El producto fue actualizado!', '');
+    //     return this.modalCtrl.dismiss(res, 'updated');
+    //   },
+    //   error => {
+    //     console.log(error);
+    //   }
+    // );
   }
 
   changeName(event: string) {

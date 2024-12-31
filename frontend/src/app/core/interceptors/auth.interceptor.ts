@@ -36,7 +36,10 @@ export class AuthInterceptor implements HttpInterceptor {
     request = request.clone({
       url: originalUrl,
     });
-    request = this.addTokenHeader(request);
+    if (!originalUrl.includes('auth')) {
+      request = this.addTokenHeader(request);
+      
+    }
     return next.handle(request).pipe(
       timeout({
         first: 30_000,

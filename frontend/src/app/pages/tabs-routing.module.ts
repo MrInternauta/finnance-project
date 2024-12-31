@@ -25,15 +25,15 @@ const routes: Routes = [
         path: 'tab3',
         loadChildren: () => import('./profile/tab3.module').then(m => m.Tab3PageModule),
       },
-      {
-        // canActivate: [RoleGuardGuard],
-        data: { roles: ['ADMIN', 'CASHIER', 'CLIENT'] },
-        path: 'tab4',
-        loadChildren: () => import('./cart/cart.module').then(m => m.Tab2PageModule),
-      },
+      // {
+      //   // canActivate: [RoleGuardGuard],
+      //   data: { roles: ['ADMIN', 'CASHIER', 'CLIENT'] },
+      //   path: 'tab4',
+      //   loadChildren: () => import('./cart/cart.module').then(m => m.Tab2PageModule),
+      // },
       {
         path: '',
-        redirectTo: '/tabs/tab2',
+        redirectTo: '/tabs/tab1',
         pathMatch: 'full',
       },
     ],

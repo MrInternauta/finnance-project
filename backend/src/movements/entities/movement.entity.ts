@@ -1,9 +1,8 @@
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { BasicEntity } from '../../core/interfaces/basic.entity';
 import { Category } from './category.entity';
 import { User } from '../../users/entities/user.entity';
-import { Exclude } from 'class-transformer';
 
 /* eslint-disable prettier/prettier */
 @Entity({

@@ -1,6 +1,6 @@
 <ion-header [translucent]="false" class="ion-no-border">
   <ion-toolbar>
-    <ion-title> Historial de compras</ion-title>
+    <ion-title> Historial de movimientos</ion-title>
     <!-- <ion-buttons slot="end">
       <app-filter-popover></app-filter-popover>
     </ion-buttons> -->
@@ -38,19 +38,20 @@
           <h2
             class="mt-4 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900"
           >
-            Lorem ipsum dolor sit amet consectetur
+            Sin movimientos!
           </h2>
         </div>
       </div>
       <ion-list *ngIf="historyWorkout?.length">
         <ion-item *ngFor="let workout of historyWorkout" detail="true" class="w-full"
-          (click)="onItemClicked(workout)"
         >
+        <ion-badge slot="end" [color]=" workout?.income ? 'success': 'danger' ">{{workout?.quantity | currency}}</ion-badge>
         <div class="flex flex-col mb-2">
-          <p class="font-bold leading-9 tracking-tight mb-1 uppercase">Orden #{{workout?.id}}</p>
+          <p class="font-bold leading-9 tracking-tight mb-1 uppercase">{{workout?.name}}</p>
           <ion-label>
-            <p>Total: ${{workout?.total}}</p>
-            <p>Fecha de creación: {{workout?.createAt | date}}</p>
+            <p *ngIf="workout?.category"  >Categoria: {{ workout?.category?.name }}</p>
+            <p *ngIf="workout?.description" >Descripcion: {{ workout?.description }}</p>
+            <p>Fecha: {{workout?.date | date}}</p>
           </ion-label>
         </div>
         </ion-item>

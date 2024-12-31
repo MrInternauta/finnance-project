@@ -17,7 +17,7 @@ export class LogoutGuard implements CanActivate {
       if (!sessionStorage) {
         return true;
       }
-      this.router.navigate(['tabs', 'tab2'], { replaceUrl: true });
+      this.router.navigate(['tabs', 'tab1'], { replaceUrl: true });
       return false;
     } catch (error) {
       return false;

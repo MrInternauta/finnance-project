@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title> Orden # {{orderService.itemSelected?.id}}</ion-title>
+    <ion-title>{{orderService.itemSelected?.id}}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -16,24 +16,22 @@
             <ion-card *ngFor="let item of orderService?.itemSelected?.items" style="margin-bottom: 10px">
               <ion-item>
                 <p class="uppercase text-lg font-semibold">{{item?.product?.name}}</p>
-              </ion-item>
+              </ion-item> 
 
               <ion-card-content>
                 <ion-grid>
                   <ion-row>
-                    <ion-col>
-                      <app-avatar [size]="'small'" [img]="item?.product?.image || ''" [type]="'product'"></app-avatar>
-                    </ion-col>
-
                     <ion-col size="5">
                       <ion-card-subtitle><strong>Quantity:</strong></ion-card-subtitle>
-                      <ion-card-subtitle><strong>Price:</strong></ion-card-subtitle>
-                      <ion-card-subtitle><strong>Subtotal:</strong></ion-card-subtitle>
+                      <ion-card-subtitle><strong>Date:</strong></ion-card-subtitle>
+                      <ion-card-subtitle><strong>Income:</strong></ion-card-subtitle>
                     </ion-col>
                     <ion-col class="customCol">
                       <p>{{item?.quantity }}</p>
-                      <p>{{item?.product?.priceSell | currency }}</p>
-                      <p>{{ getTotal(item?.product?.priceSell, item?.quantity) | currency }}</p>
+                      <p>{{item?.quantity }}</p>
+
+                      <!-- <p>{{item?.product?.priceSell | currency }}</p> -->
+                      <!-- <p>{{ getTotal(item?.product?.priceSell, item?.quantity) | currency }}</p> -->
                     </ion-col>
                   </ion-row>
                 </ion-grid>

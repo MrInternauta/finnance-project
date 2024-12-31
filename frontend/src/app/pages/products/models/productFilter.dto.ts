@@ -1,13 +1,9 @@
 export interface ProductsFilterDto {
-  minPrice: number;
-
-  maxPrice: number;
-
+  name?: string;
+  date?: string;
+  categoryId?: number;
+  userId?: number;
+  income?: boolean;
   limit: number;
-
   offset: number;
-
-  categoryId?: string;
-
-  orderBy?: string;
 }

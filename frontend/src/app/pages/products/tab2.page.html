@@ -2,7 +2,7 @@
   <ion-toolbar>
     <ion-title> Lista de productos </ion-title>
     <ion-buttons slot="end">
-      <app-filter-popover [categories]="categories" (clickedItem)="clickedItem($event)" (clickedCategory)="clickedCategory($event)" [selectedFilteritem]="selectedFilteritem || filter.categoryId || ''"></app-filter-popover>
+      <!-- <app-filter-popover [categories]="categories" (clickedItem)="clickedItem($event)" (clickedCategory)="clickedCategory($event)" [selectedFilteritem]="selectedFilteritem || filter.categoryId || ''"></app-filter-popover> -->
       
     </ion-buttons>
   </ion-toolbar>
@@ -40,8 +40,8 @@
                   Agregar al carrito</ion-item-option
                 >
               </ion-item-options>
-
-              <app-product-item
+item
+              <!-- <app-product-item
                 [detailed]="true"
                 [image]="workout?.image"
                 [name]="workout?.name"
@@ -49,7 +49,7 @@
                 [category]="workout?.category?.name"
                 [price]="workout?.priceSell"
                 [description]="workout?.description || workout?.code">
-              </app-product-item>
+              </app-product-item> -->
 
               <ion-item-options slot="end">
                 <ion-item-option (click)="edit(workout)" color="warning">
@@ -89,8 +89,8 @@
                   Agregar al carrito</ion-item-option
                 >
               </ion-item-options>
-
-              <app-product-item
+item
+              <!-- <app-product-item
                 [detailed]="true"
                 [image]="workout?.image"
                 [name]="workout?.name"
@@ -98,7 +98,7 @@
                 [category]="workout?.category?.name"
                 [price]="workout?.priceSell"
                 [description]="workout?.description || workout?.code">
-              </app-product-item>
+              </app-product-item> -->
               <ion-item-options slot="end">
                 <ion-item-option (click)="edit(workout)" color="warning">
                   <ion-icon slot="start" name="pencil-outline"></ion-icon>

@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 
 import { OrderResponse } from './models/order.model';
 import { OrderService } from './services/order.service';
+import { ArticleItemResponse } from '../products/models';
 
 @Component({
   selector: 'app-tab1',
@@ -15,7 +16,7 @@ import { OrderService } from './services/order.service';
 })
 export class Tab1Page implements OnInit, OnDestroy {
   private newLabel? = 'New label';
-  public historyWorkout: OrderResponse[] = [];
+  public historyWorkout:  ArticleItemResponse[] = [];
   private subscription$!: Subscription;
   constructor(
     private orderService: OrderService,
@@ -27,7 +28,7 @@ export class Tab1Page implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscription$ = this.orderService.getOrders().subscribe(response => {
-      this.historyWorkout = response?.orders || [];
+      this.historyWorkout = response?.movements || [];
     });
   }
 

@@ -64,13 +64,15 @@ export class AppService {
         await this.categoriesServices.create(item);
       });
 
-      // const products = this.productsServices.defaultProducts();
-      // products.map(async item => {
-      //   await this.productsServices.create(item);
-      // });
+      const products = this.productsServices.defaultProducts();
+      products.map(async item => {
+        await this.productsServices.create(item);
+      });
+
       return {
         message: 'Values set successfully!',
       };
+      
     } catch (error) {
       console.log(error);
       throw new BadRequestException('Values already set');

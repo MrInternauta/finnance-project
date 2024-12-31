@@ -4,9 +4,10 @@ import { API_PREFIX } from 'src/app/core/constants';
 
 import { environment } from '../../../../environments/environment';
 import { OrderFilterDto } from '../../products/models/order.filter.dto';
-import { IOrderModel, OrderResponse } from '../models/order.model';
+import { OrderResponse } from '../models/order.model';
+import { ArticleResponse } from '@gymTrack/pages/products/models';
 
-const API_URL = `${environment.url}${API_PREFIX}orders`;
+const API_URL = `${environment.url}${API_PREFIX}movements`;
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +17,7 @@ export class OrderService {
   constructor(public http: HttpClient) {}
 
   getOrders(params?: OrderFilterDto) {
-    return this.http.get<IOrderModel | null>(API_URL, {
+    return this.http.get<ArticleResponse | null>(API_URL, {
       params: {
         ...params,
       },

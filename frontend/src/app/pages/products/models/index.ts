@@ -1,29 +1,31 @@
+import { User } from 'src/app/core/models';
 export interface ArticleResponse {
-  products: ArticleItemResponse[];
+  movements: ArticleItemResponse[];
 }
 
 export interface ArticleItemResponse {
-  id: string;
-  categoryId: string;
-  code: string;
+  id: number;
+  categoryId?: number;
+  userId?: number;
   name: string;
-  stock: string;
+  date: Date;
   description: string;
-  image: string;
-  price: string;
-  priceSell: string;
+  quantity: number;
+  income?: boolean;
   category?: CategoryItemResponse;
+  user?: User
 }
 
 export interface ArticleCreate {
   id?: string | number;
-  code: string;
-  name?: string;
-  stock: string;
+  name: string;
+  date: Date;
   description: string;
-  price: string;
-  priceSell: string;
-  categoryId?: string | number;
+  quantity: number;
+  income?: boolean;
+  categoryId?: number;
+  userId?: number;
+
 }
 
 export interface CategoryResponse {
@@ -33,5 +35,4 @@ export interface CategoryResponse {
 export interface CategoryItemResponse {
   id: number;
   name: string;
-  image: string;
 }

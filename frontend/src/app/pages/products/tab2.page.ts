@@ -9,7 +9,6 @@ import { map, Observable, Subscription, take } from 'rxjs';
 
 import { ModalInfoService } from '../../core/services/modal.service';
 import { AppState } from '../../core/state/app.reducer';
-import { AddProductCart } from '../cart/state/cart.actions';
 import { DetailComponent } from './detail/detail.component';
 import { ArticleCreate, ArticleItemResponse, CategoryItemResponse } from './models';
 import { ProductsFilterDto } from './models/productFilter.dto';
@@ -49,7 +48,7 @@ export class Tab2Page implements OnDestroy, OnInit {
     private productService: WorkoutService
   ) {
     this.loadProducts();
-    this.$observable = this.store.select('exercises');
+    // this.$observable = this.store.select('exercises');
     this.$observable.subscribe(value => {
       console.log(value?.Exercise);
     });
@@ -70,19 +69,19 @@ export class Tab2Page implements OnDestroy, OnInit {
 
   setDefaultFilter() {
     this.selectedFilteritem = '';
-    this.filter = {
-      limit: 1000,
-      maxPrice: 9999,
-      minPrice: 0,
-      offset: 0,
-      categoryId: '',
-    };
+    // this.filter = {
+    //   limit: 1000,
+    //   maxPrice: 9999,
+    //   minPrice: 0,
+    //   offset: 0,
+    //   categoryId: '',
+    // };
   }
 
   loadProducts() {
     this.productSuscription$ = this.exercisesService.getProducts(this.filter).subscribe(
       response => {
-        if (response) this.store.dispatch(loadedExercise({ Exercise: response }));
+        // if (response) this.store.dispatch(loadedExercise({ Exercise: response }));
       },
       async error => {
         const toast = await this.toastController.create({
@@ -154,9 +153,7 @@ export class Tab2Page implements OnDestroy, OnInit {
         item_?.Exercise?.products.filter(
           (item: ArticleItemResponse) =>
             String(item.name).toLocaleLowerCase().includes(String(value).toLocaleLowerCase()) ||
-            String(item.description).toLocaleLowerCase().includes(String(value).toLocaleLowerCase()) ||
-            String(item?.code).toLocaleLowerCase().includes(String(value).toLocaleLowerCase())
-        )
+            String(item.description).toLocaleLowerCase().includes(String(value).toLocaleLowerCase())         )
       )
     );
   }
@@ -191,15 +188,6 @@ export class Tab2Page implements OnDestroy, OnInit {
               {
                 text: 'Registrar',
                 handler: () => {
-                  this.openModal({
-                    id: '',
-                    code: code,
-                    name: '',
-                    description: '',
-                    price: '',
-                    priceSell: '',
-                    stock: '',
-                  });
                 },
               },
             ],
@@ -232,29 +220,7 @@ export class Tab2Page implements OnDestroy, OnInit {
   }
 
   async addToCard(article: ArticleItemResponse, quantity: number) {
-    if (!article?.stock || parseInt(article?.stock || '0') < quantity) {
-      const toast = await this.toastController.create({
-        cssClass: 'my-custom-toast',
-        header: 'Producto no cuenta con suficientes existencias: ',
-        message: article.name,
-        duration: 3000,
-        position: 'top',
-        icon: 'checkmark-circle-outline',
-        color: 'warning',
-        buttons: [
-          {
-            icon: 'close',
-            htmlAttributes: {
-              'aria-label': 'close',
-            },
-          },
-        ],
-      });
-      toast.present();
-
-      return;
-    }
-    this.store.dispatch(AddProductCart({ article, quantity }));
+    // this.store.dispatch(AddProductCart({ article, quantity }));
     this.presentProductAddedModal(article);
     //this.router.navigate(['tabs', 'tab4'], { replaceUrl: true });
   }
@@ -334,14 +300,14 @@ export class Tab2Page implements OnDestroy, OnInit {
 
   clickedCategory(value: string) {
     this.setDefaultFilter();
-    this.filter.categoryId = value;
+    // this.filter.categoryId = value;
     this.loadProducts();
     //this.showClearButton = true;
   }
 
   getCategories() {
     this.subscriptionCategories$ = this.productService.getCategories().subscribe(categoriesResponse => {
-      this.categories = categoriesResponse?.categories || [];
+      // this.categories = categoriesResponse?.categories || [];
       console.log(this.categories);
     });
   }

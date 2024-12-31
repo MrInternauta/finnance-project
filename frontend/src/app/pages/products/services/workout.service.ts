@@ -6,7 +6,7 @@ import { environment } from '../../../../environments/environment';
 import { ArticleCreate, ArticleResponse, CategoryResponse } from '../models';
 import { ProductsFilterDto } from '../models/productFilter.dto';
 
-const API_URL = `${environment.url}${API_PREFIX}products`;
+const API_URL = `${environment.url}${API_PREFIX}movements`;
 const API_URL_CATEGORY = `${environment.url}${API_PREFIX}categories`;
 
 @Injectable({
