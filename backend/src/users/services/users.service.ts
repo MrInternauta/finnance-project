@@ -79,7 +79,6 @@ export class UsersService {
     }
     if (payload?.role?.id && !isNaN(payload?.role?.id)) {
       const role = await this.rolesService.findOne(payload?.role?.id);
-      console.log('role', role);
       this.userRepo.merge(user, {
         name: payload.name,
         lastName: payload.lastName,

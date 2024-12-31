@@ -10,3 +10,7 @@ jarsigner -keystore /Users/feliperamirez/upload.jks -storepass password /Users/f
 &&
 
 /Users/feliperamirez/Library/Android/sdk/build-tools/34.0.0/zipalign 4 /Users/feliperamirez/Projects/POS_APP/android/app/build/outputs/apk/release/app-release-unsigned.apk /Users/feliperamirez/Projects/POS_APP/android/app/build/outputs/apk/release/app-release-signed.apk
+
+
+❯ node -v
+v20.9.0

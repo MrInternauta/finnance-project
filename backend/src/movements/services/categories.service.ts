@@ -74,25 +74,46 @@ export class CategoriesService {
   defaultValue() {
     return [
       {
-        name: 'PAN',
+        name: 'SUELDO',
       },
       {
-        name: 'TORTILLA',
+        name: 'INVERSIONES',
       },
       {
-        name: 'COCA-COLA',
+        name: 'ALOJAMIENTO',
       },
       {
-        name: 'ABAROTES',
+        name: 'ENTRETENIMIENTO',
       },
       {
-        name: 'MARINELA-BIMBO',
+        name: 'TRANSPORTE',
       },
       {
-        name: 'DULCES',
+        name: 'GTS_PERSONALES',
       },
       {
-        name: 'AGUA',
+        name: 'SEGUROS',
+      },
+      {
+        name: 'CREDITO',
+      },
+      {
+        name: 'COMIDA',
+      },
+      {
+        name: 'AHORRO',
+      },
+      {
+        name: 'APRENDIZAJE',
+      },
+      {
+        name: 'REGALOS',
+      },
+      {
+        name: 'CUIDADO_PERSONAL',
+      },
+      {
+        name: 'METAS',
       },
       {
         name: 'OTROS',

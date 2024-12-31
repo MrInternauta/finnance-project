@@ -42,11 +42,17 @@ export class RolesService {
         throw new InternalServerErrorException('Role cannot be crated');
       }
 
-      await this.validatePermissions(permissions);
+
+      const newRole = await this.roleRepo.save(role);
+
       const newPermission = await this.createPermissions(permissions);
-      const allResult = await Promise.all(newPermission);
-      role.permissions = allResult;
-      return this.roleRepo.save(role);
+
+      this.roleRepo.merge(newRole, {
+        permissions: newPermission
+      });
+      
+      return this.roleRepo.save(newRole);
+
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('Error creating role');
@@ -82,15 +88,15 @@ export class RolesService {
     });
   }
 
-  createPermissions(permissions: PermissionDto[]): Array<Promise<Permission>> {
-    const newPermissions: Promise<Permission>[] = [];
+  async createPermissions(permissions: PermissionDto[]): Promise<Array<Permission>> {
+    const newPermissions: Permission[] = [];
     for (let index = 0; index < permissions.length; index++) {
-      const newPermission = this.createPermission({
+      const newPermission = await this.createPermission({
         name: permissions[index]?.name,
-        description: permissions[index]?.description || null,
+        description: permissions[index]?.description || '',
       });
       newPermissions.push(newPermission);
-    }
+    }    
     return newPermissions;
   }
 
@@ -122,7 +128,11 @@ export class RolesService {
     if (currentPermission?.id) {
       return currentPermission;
     }
-    return this.permissionRepo.create(permission);
+    const newPermission  = this.permissionRepo.create({
+      ...permission
+    });
+    return this.permissionRepo.save(newPermission);
+
   }
 
   async updatePermission(permission: PermissionDto) {
@@ -150,14 +160,26 @@ export class RolesService {
           name: 'Users',
           description: '',
         },
+        {
+          name: 'Movements',
+          description: '',
+        },
+        {
+          name: 'Categories',
+          description: '',
+        },
       ],
     };
 
     const role_cashier: RoleDto = {
-      name: 'CASHIER',
+      name: 'CLIENT_PRO',
       permissions: [
         {
-          name: 'Orders',
+          name: 'Movements',
+          description: '',
+        },
+        {
+          name: 'Categories',
           description: '',
         },
       ],
@@ -167,11 +189,12 @@ export class RolesService {
       name: 'CLIENT',
       permissions: [
         {
-          name: 'Products',
+          name: 'Movements',
           description: '',
         },
       ],
     };
+
     return {
       role_admin,
       role_cashier,

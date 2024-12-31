@@ -24,26 +24,20 @@ export class AppService {
   async setDefaultValues() {
     try {
       const roles = this.rolesService.defaultValuesRole();
-      //create permissions
-      const permission_admin = await Promise.all(this.rolesService.createPermissions(roles.role_admin.permissions));
-
-      const permission_vendor = await Promise.all(this.rolesService.createPermissions(roles.role_cashier.permissions));
-
-      const permission_client = await Promise.all(this.rolesService.createPermissions(roles.role_client.permissions));
-
+      
       const role_admin = await this.rolesService.create({
         name: roles.role_admin.name,
-        permissions: permission_admin,
+        permissions: roles.role_admin.permissions,
       });
 
       const role_cashier = await this.rolesService.create({
         name: roles.role_cashier.name,
-        permissions: permission_vendor,
+        permissions: roles.role_cashier.permissions,
       });
 
       const role_client = await this.rolesService.create({
         name: roles.role_client.name,
-        permissions: permission_client,
+        permissions: roles.role_client.permissions,
       });
 
       const users = this.usersService.defaultValuesUser();
@@ -70,10 +64,10 @@ export class AppService {
         await this.categoriesServices.create(item);
       });
 
-      const products = this.productsServices.defaultProducts();
-      products.map(async item => {
-        await this.productsServices.create(item);
-      });
+      // const products = this.productsServices.defaultProducts();
+      // products.map(async item => {
+      //   await this.productsServices.create(item);
+      // });
       return {
         message: 'Values set successfully!',
       };
