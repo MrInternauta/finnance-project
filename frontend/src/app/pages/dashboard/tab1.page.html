@@ -1,0 +1,60 @@
+<ion-header [translucent]="false" class="ion-no-border">
+  <ion-toolbar>
+    <ion-title> Historial de compras</ion-title>
+    <!-- <ion-buttons slot="end">
+      <app-filter-popover></app-filter-popover>
+    </ion-buttons> -->
+  </ion-toolbar>
+  
+  <ion-toolbar>
+    <ion-searchbar class="sm:mx-[25%] sm:w-auto"
+    show-cancel-button="focus"
+    show-clear-button="never"
+    cancel-button-icon="trash"
+    placeholder="Buscar..."
+    ></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+
+<ion-content [fullscreen]="true">
+  <div class="flex min-h-full flex-col justify-start px-4 py-4 lg:px-6">
+    <div class="sm:mx-auto sm:w-full sm:max-w-sm md:max-w-md">
+      <canvas
+      *ngIf="false" 
+        baseChart
+        class="chart"
+        [data]="lineChartData"
+        [options]="lineChartOptions"
+        [type]="lineChartType"
+        (chartHover)="chartHovered($event)"
+        (chartClick)="chartClicked($event)"
+      ></canvas>
+      <div
+        *ngIf="!historyWorkout?.length"
+        class="flex min-h-full flex-col justify-center"
+      >
+        <div class="sm:mx-auto sm:w-full sm:max-w-sm md:max-w-md">
+          <h2
+            class="mt-4 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900"
+          >
+            Lorem ipsum dolor sit amet consectetur
+          </h2>
+        </div>
+      </div>
+      <ion-list *ngIf="historyWorkout?.length">
+        <ion-item *ngFor="let workout of historyWorkout" detail="true" class="w-full"
+          (click)="onItemClicked(workout)"
+        >
+        <div class="flex flex-col mb-2">
+          <p class="font-bold leading-9 tracking-tight mb-1 uppercase">Orden #{{workout?.id}}</p>
+          <ion-label>
+            <p>Total: ${{workout?.total}}</p>
+            <p>Fecha de creación: {{workout?.createAt | date}}</p>
+          </ion-label>
+        </div>
+        </ion-item>
+      </ion-list>
+    </div>
+  </div>
+</ion-content>

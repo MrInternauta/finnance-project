@@ -1,0 +1,51 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": false,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2020",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "noImplicitReturns": true,
+    "downlevelIteration": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "paths": {
+      "@project/core": [
+        "src/core"
+      ],
+      "@project/auth": [
+        "src/core/auth"
+      ],
+      "@project/home": [
+        "src/home/*"
+      ],
+      "@project/products": [
+        "src/products/*"
+      ],
+      "@project/users": [
+        "src/users/*"
+      ],
+      "@project/config": [
+        "src/config.ts"
+      ],
+      "@project/*": [
+        "src/app/*"
+      ],
+    },
+  }
+}
