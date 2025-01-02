@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { Tab1Page } from './tab1.page';
+import { DetailComponent } from './detail/detail.component';
 
 const routes: Routes = [
   {
@@ -9,8 +10,8 @@ const routes: Routes = [
     component: Tab1Page,
   },
   {
-    path: 'order',
-    loadChildren: () => import('./pages/order/order.module').then(m => m.OrderPageModule),
+    path: 'detail',
+    component: DetailComponent
   },
 ];
 

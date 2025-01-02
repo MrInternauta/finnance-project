@@ -30,3 +30,6 @@
 // Theme customization
 @import './assets/scss/app.scss';
 
+ion-datetime-button::part(native) {
+    background: none;
+}

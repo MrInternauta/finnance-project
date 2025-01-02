@@ -1,4 +1,4 @@
-import { ArticleItemResponse } from '../../products/models/index';
+import { ArticleItemResponse } from './index';
 
 export interface IOrderModel {
   orders: OrderResponse[];

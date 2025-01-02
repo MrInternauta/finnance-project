@@ -1,114 +1,106 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="cancel()">Cancelar</ion-button>
+      <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>Detalle de producto</ion-title>
+    <ion-title>Detalle de movimiento</ion-title>
   </ion-toolbar>
 </ion-header>
 <ion-content class="ion-padding">
+  <!-- name,categoryId, date, description, quantity, income -->
+
   <div class="sm:mx-auto sm:w-full sm:max-w-sm md:max-w-md">
     <!-- <app-avatar (click)="getImage()" [size]="'large'" [img]="product?.image || ''" [type]="'product'"></app-avatar> -->
   </div>
+
   <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-sm md:max-w-md">
       <div class="flex mt-4 w-full">
         <div class="w-full">
-          <!-- <app-input
+          <app-input
             [inputValue]="name || ''"
             (inputValueChange)="changeName($event)"
             [id]="'name'"
             [type]="'text'"
-            [label]="'Nombre del producto*'"
+            [label]="'Concepto*'"
             [required]="true"
             [maxLength]="100"
-            [disabled]="!!product?.id || !!product?.name"></app-input> -->
+            [disabled]="!!product?.id || !!product?.name"></app-input>
         </div>
       </div>
 
       <div class="flex mt-4 w-full">
         <div class="w-full">
-          <!-- <app-input
-            [id]="'code'"
-            [type]="'text'"
-            [label]="'Código de barras*'"
+          <app-input
+            [id]="'date'"
+            [type]="'date'"
+            [label]="'Fecha y hora*'"
             [required]="true"
             [maxLength]="100"
             [inputValue]="code || ''"
-            (inputValueChange)="changeCode($event)"></app-input> -->
+            (inputValueChange)="changeCode($event)"></app-input>
         </div>
       </div>
 
       <div class="flex mt-4 w-full">
-        <div class="w-full">
-          <!-- <app-input
-            [id]="'stock'"
-            [type]="'number'"
-            [label]="'Número de existencias*'"
+        <div class="w-1/2">
+          <app-input
+            [id]="'quantity'"
+            [type]="'currency'"
+            [label]="'Cantidad $*'"
             [required]="false"
             [maxLength]="100"
-            [inputValue]="stock || ''"
-            (inputValueChange)="changeStock($event)"></app-input> -->
+            inputValue="{{ (stock || '') }}"
+            (inputValueChange)="changeStock($event)"></app-input>
         </div>
+
+        <div class="w-1/2">
+          <app-input
+          [id]="'outcome'"
+          [type]="'toggle'"
+          [label]="'Es Gasto'"
+          [placeholder]="'Es Gasto'"
+          [required]="false"
+          [inputValue]="'true'"
+          (inputValueChange)="changeStock($event)"></app-input>
+        </div>
+
+
+
       </div>
 
       <div class="flex mt-4 w-full">
         <div class="w-full">
-          <!-- <app-select
+          <app-select
             [dataSource]="this.categories"
             [disabled]="!this.categories || !this.categories.length"
             [size]="'regular'"
             [id]="'select'"
             [label]="'Seleccionar categoria*'"
-            [placeholder]="'Seleccionar categoria'"
-            (inputValueChange)="changeSelect($event)"></app-select> -->
-        </div>
-      </div>
-
-      <div class="flex mt-4 w-full">
-        <div class="w-1/2 mr-4">
-          <!-- <app-input
-            [id]="'price'"
-            [type]="'number'"
-            [label]="'Precio de Compra'"
-            [required]="false"
-            [maxLength]="100"
-            [inputValue]="price || ''"
-            (inputValueChange)="changePrice($event)"></app-input> -->
-        </div>
-
-        <div class="w-1/2">
-          <!-- <app-input
-            [id]="'price_sell'"
-            [type]="'number'"
-            [label]="'Precio de venta*'"
-            [required]="true"
-            [maxLength]="100"
-            [inputValue]="price_sell || ''"
-            (inputValueChange)="changePriceSell($event)"></app-input> -->
+            (inputValueChange)="changeSelect($event)"></app-select>
         </div>
       </div>
 
       <div class="flex mt-4 w-full">
         <div class="w-full">
-          <!-- <app-input
+          <app-input
             [id]="'description'"
             [type]="'text'"
             [label]="'Descripción'"
             [required]="false"
             [maxLength]="200"
             [inputValue]="description || ''"
-            (inputValueChange)="changeDescription($event)"></app-input> -->
+            (inputValueChange)="changeDescription($event)"></app-input>
         </div>
       </div>
 
       <div class="mt-4 text-center text-sm text-gray-500">
-        <!-- <app-button
+        <app-button
           (click)="confirm()"
           [outline]="false"
           [label]="'Guardar'"
           [disabled]="!isValidForm"
-          size="large"></app-button> -->
+          size="large"></app-button>
       </div>
     </div>
   </div>

@@ -9,11 +9,11 @@ import { map, Observable, Subscription, take } from 'rxjs';
 
 import { ModalInfoService } from '../../core/services/modal.service';
 import { AppState } from '../../core/state/app.reducer';
-import { DetailComponent } from './detail/detail.component';
-import { ArticleCreate, ArticleItemResponse, CategoryItemResponse } from './models';
-import { ProductsFilterDto } from './models/productFilter.dto';
-import { WorkoutService } from './services/workout.service';
-import { loadedExercise } from './state/workout.actions';
+import { DetailComponent } from '../dashboard/detail/detail.component';
+import { ArticleCreate, ArticleItemResponse, CategoryItemResponse } from '../dashboard/models';
+import { ProductsFilterDto } from '../dashboard/models/productFilter.dto';
+import { WorkoutService } from '../dashboard/services/workout.service';
+import { loadedExercise } from '../dashboard/state/workout.actions';
 
 @Component({
   selector: 'app-tab2',

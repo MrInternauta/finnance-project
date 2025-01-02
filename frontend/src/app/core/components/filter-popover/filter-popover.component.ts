@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 
-import { CategoryItemResponse } from '../../../pages/products/models/index';
+import { CategoryItemResponse } from '../../../pages/dashboard/models/index';
 
 @Component({
   selector: 'app-filter-popover',

@@ -83,15 +83,15 @@ export class DetailComponent implements OnDestroy, OnInit {
 
   getCategories() {
     this.subscriptionCategories$ = this.productService.getCategories().subscribe(categoriesResponse => {
-      // this.categories =
-      //   categoriesResponse?.categories.map(item => {
-      //     return {
-      //       name: item.name,
-      //       value: item.id.toString(),
-      //       selected:
-      //         item.id?.toString()?.toLocaleLowerCase() === this.product?.category?.id?.toString()?.toLocaleLowerCase(),
-      //     };
-      //   }) || [];
+      this.categories =
+        categoriesResponse?.categories.map(item => {
+          return {
+            name: item.name,
+            value: item.id.toString(),
+            selected:
+              item.id?.toString()?.toLocaleLowerCase() === this.product?.category?.id?.toString()?.toLocaleLowerCase(),
+          };
+        }) || [];
     });
   }
 

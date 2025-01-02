@@ -24,7 +24,8 @@
     </ng-container>
 
     <input
-      *ngIf="type !== 'phone'"
+      focusout
+      *ngIf="type !== 'phone' && type !== 'date' && type !== 'toggle'"
       [placeholder]="placeholder"
       [(ngModel)]="inputValue"
       (ngModelChange)="handleChange($event)"
@@ -42,6 +43,45 @@
         'px-4 py-3.5': size !== 'small',
       }"
       class="block w-full rounded-md border-0 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6" />
+    <ng-container *ngIf="type === 'toggle'">
+      <div
+        class="block w-full rounded-md border-0 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+        [ngClass]="{
+          'ring-red-600 focus:ring-red-600': hasError,
+          'block rounded-md border-0 text-center': size === 'small',
+          'px-4 py-2.5': size !== 'small',
+        }">
+        <ion-toggle [enableOnOffLabels]="true" [checked]="!!inputValue" >{{placeholder}}</ion-toggle>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="type === 'date'">
+      <ion-datetime-button
+        datetime="datetime"
+        [ngClass]="{
+          'ring-red-600 focus:ring-red-600': hasError,
+          'block rounded-md border-0 text-center': size === 'small',
+          'px-4 py-3.5': size !== 'small',
+        }"
+        class="w-full rounded-md border-0 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 flex justify-between"
+        ></ion-datetime-button>
+
+      <ion-modal [keepContentsMounted]="true">
+        <ng-template>
+          <ion-datetime
+            locale="es-ES"
+            id="datetime"
+            presentation="date-time"
+            [showDefaultButtons]="true"
+            [value]="inputValue || null"
+            doneText="Listo"
+            cancelText="Cancelar">
+            <span slot="time-label">Tiempo</span>
+          </ion-datetime>
+        </ng-template>
+      </ion-modal>
+    </ng-container>
+
     <label *ngIf="hasError" class="mt-2 ml-2 block text-sm font-medium leading-6 text-red-600">{{ hasError }}</label>
   </div>
 </div>

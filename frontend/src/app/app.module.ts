@@ -24,7 +24,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { PermissionsEffects } from './auth/state/permissions.effects';
 import { CommonLayoutComponent } from './layouts/common-layout/common-layout.component';
-import { ExercisesEffects } from './pages/products/state/workout.effects';
+import { ExercisesEffects } from './pages/dashboard/state/workout.effects';
 import { ThemeConstantService } from './shared/services/theme-constant.service';
 import { SharedModule } from './shared/shared.module';
 import { TemplateModule } from './shared/template/template.module';

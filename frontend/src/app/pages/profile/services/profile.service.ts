@@ -4,9 +4,9 @@ import { API_PREFIX } from 'src/app/core/constants';
 import { GenericResponse, IExercise, User } from 'src/app/core/models';
 import { environment } from '../../../../environments/environment';
 import { UserDto, UserUpdateDto } from '@gymTrack/auth/model/user.dto';
-import { ProductsFilterDto } from '@gymTrack/pages/products/models/productFilter.dto';
+import { ProductsFilterDto } from '@gymTrack/pages/dashboard/models/productFilter.dto';
 import { UserUpdatedResponse } from '../models';
-import { ArticleItemResponse } from '../../products/models/index';
+import { ArticleItemResponse } from '../../dashboard/models/index';
 const API_URL = `${environment.url}${API_PREFIX}users`;
 
 @Injectable({

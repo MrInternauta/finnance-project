@@ -1,7 +1,7 @@
 import { ActionReducerMap } from '@ngrx/store';
 
 import * as auth from '../../auth/state/auth.state';
-import * as product from '../../pages/products/state/workout.state';
+import * as product from '../../pages/dashboard/state/workout.state';
 
 export interface AppState {
   session_data: auth.IAuthState;

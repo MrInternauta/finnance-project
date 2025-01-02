@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 
 import { OrderResponse } from './models/order.model';
 import { OrderService } from './services/order.service';
-import { ArticleItemResponse } from '../products/models';
+import { ArticleItemResponse } from './models';
 
 @Component({
   selector: 'app-tab1',
