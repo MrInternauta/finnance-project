@@ -16,10 +16,9 @@ import { WorkoutService } from '../services/workout.service';
 export class DetailComponent implements OnDestroy, OnInit {
   @Input() product?: ArticleItemResponse | null = null;
   name!: string;
-  code!: string;
-  stock!: string;
-  price!: string;
-  price_sell!: string;
+  date!: string;
+  quantity!: string;
+  outcome!: boolean;
   description!: string;
   categoryId!: string;
   subscription$!: Subscription;
@@ -41,17 +40,14 @@ export class DetailComponent implements OnDestroy, OnInit {
       return false;
     }
 
-    if (!this.code) {
+    if (!this.date) {
       return false;
     }
 
-    if (!this.stock) {
+    if (!this.quantity) {
       return false;
     }
 
-    if (!this.price && !this.price_sell) {
-      return false;
-    }
     //Required fields
     if (!this.didSomeChange) {
       return false;
@@ -61,16 +57,15 @@ export class DetailComponent implements OnDestroy, OnInit {
   }
 
   ngOnInit(): void {
-    // if (this.product) {
-    //   this.name = this.product?.name;
-    //   this.code = this.product?.code;
-    //   this.stock = this.product?.stock;
-    //   this.price = this.product?.price;
-    //   this.price_sell = this.product?.priceSell;
-    //   this.description = this.product?.description;
-    //   this.categoryId = this.product?.categoryId;
-    //   console.log(this.product);
-    // }
+    if (this.product) {
+      this.name = this.product?.name;
+      this.date = this.product?.date.toISOString();
+      this.description = this.product?.description;
+      this.outcome = !this.product?.income;
+      this.categoryId = this.product?.category?.id?.toString() || '';
+      this.quantity = this.product?.quantity.toString();
+      console.log(this.product);
+    }
   }
 
   getImage() {
@@ -82,7 +77,7 @@ export class DetailComponent implements OnDestroy, OnInit {
   }
 
   getCategories() {
-    this.subscriptionCategories$ = this.productService.getCategories().subscribe(categoriesResponse => {
+    this.productService.getCategories().subscribe(categoriesResponse => {
       this.categories =
         categoriesResponse?.categories.map(item => {
           return {
@@ -95,7 +90,7 @@ export class DetailComponent implements OnDestroy, OnInit {
     });
   }
 
-  cancel() {
+  public cancel() {
     this.removeSubscription();
     return this.modalCtrl.dismiss(null, 'cancel');
   }
@@ -149,54 +144,37 @@ export class DetailComponent implements OnDestroy, OnInit {
     // );
   }
 
-  changeName(event: string) {
+  public changeName(event: string) {
     this.name = event;
     this.didSomeChange = true;
   }
 
-  changeCode(event: string) {
-    this.code = event;
+  public changeDate(event: Date) {
+    this.date = event?.toISOString() || '';
     this.didSomeChange = true;
   }
 
-  changeStock(event: string) {
-    this.stock = event;
+  public changeQuantity(event: string) {
+    this.quantity = event;
     this.didSomeChange = true;
   }
 
-  changePrice(event: string) {
-    this.price = event;
+  public changeOutcome(event: boolean) {
+    this.outcome = event;
     this.didSomeChange = true;
   }
 
-  changePriceSell(event: string) {
-    this.price_sell = event;
-    this.didSomeChange = true;
-  }
-
-  changeDescription(event: string) {
+  public changeDescription(event: string) {
     this.description = event;
     this.didSomeChange = true;
   }
 
-  changeSelect(event: string) {
+  public changeSelect(event: string) {
     this.categoryId = event;
     this.didSomeChange = true;
   }
 
   fillEmptyForm() {
-    if (!this.price) {
-      if (this.price_sell) {
-        this.price = this.price_sell;
-      }
-    }
-
-    if (!this.price_sell) {
-      if (this.price) {
-        this.price_sell = this.price;
-      }
-    }
-
     if (!this.description) {
       this.description = '';
     }
@@ -204,12 +182,11 @@ export class DetailComponent implements OnDestroy, OnInit {
 
   removeSubscription() {
     this.subscription$?.unsubscribe();
-    this.subscriptionCategories$?.unsubscribe();
+    // this.subscriptionCategories$?.unsubscribe();
     this.name = '';
-    this.code = '';
-    this.stock = '';
-    this.price = '';
-    this.price_sell = '';
+    this.date = new Date()?.toISOString() || '';
+    this.quantity = '';
+    this.outcome = true;
     this.description = '';
     this.product = null;
   }

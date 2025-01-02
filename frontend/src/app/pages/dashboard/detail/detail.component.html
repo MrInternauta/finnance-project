@@ -7,8 +7,6 @@
   </ion-toolbar>
 </ion-header>
 <ion-content class="ion-padding">
-  <!-- name,categoryId, date, description, quantity, income -->
-
   <div class="sm:mx-auto sm:w-full sm:max-w-sm md:max-w-md">
     <!-- <app-avatar (click)="getImage()" [size]="'large'" [img]="product?.image || ''" [type]="'product'"></app-avatar> -->
   </div>
@@ -37,8 +35,8 @@
             [label]="'Fecha y hora*'"
             [required]="true"
             [maxLength]="100"
-            [inputValue]="code || ''"
-            (inputValueChange)="changeCode($event)"></app-input>
+            [inputValue]="date || ''"
+            (inputValueChange)="changeDate($event)"></app-input>
         </div>
       </div>
 
@@ -50,8 +48,8 @@
             [label]="'Cantidad $*'"
             [required]="false"
             [maxLength]="100"
-            inputValue="{{ (stock || '') }}"
-            (inputValueChange)="changeStock($event)"></app-input>
+            inputValue="{{ (quantity || '') }}"
+            (inputValueChange)="changeQuantity($event)"></app-input>
         </div>
 
         <div class="w-1/2">
@@ -62,7 +60,7 @@
           [placeholder]="'Es Gasto'"
           [required]="false"
           [inputValue]="'true'"
-          (inputValueChange)="changeStock($event)"></app-input>
+          (inputValueChange)="changeOutcome($event)"></app-input>
         </div>
 
 

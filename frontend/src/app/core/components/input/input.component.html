@@ -43,13 +43,14 @@
         'px-4 py-3.5': size !== 'small',
       }"
       class="block w-full rounded-md border-0 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6" />
-    <ng-container *ngIf="type === 'toggle'">
+    
+      <ng-container *ngIf="type === 'toggle'">
       <div
-        class="block w-full rounded-md border-0 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+        class="h-[50.6px] flex justify-center items-center w-full rounded-md border-0 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
         [ngClass]="{
           'ring-red-600 focus:ring-red-600': hasError,
           'block rounded-md border-0 text-center': size === 'small',
-          'px-4 py-2.5': size !== 'small',
+          'px-4 py-3.5': size !== 'small',
         }">
         <ion-toggle [enableOnOffLabels]="true" [checked]="!!inputValue" >{{placeholder}}</ion-toggle>
       </div>
