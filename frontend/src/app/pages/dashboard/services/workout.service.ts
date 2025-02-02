@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { API_PREFIX } from 'src/app/core/constants';
 
 import { environment } from '../../../../environments/environment';
-import { ArticleCreate, ArticleResponse, CategoryResponse } from '../models';
+import { ArticleCreate, ArticleItemResponse, ArticleResponse, CategoryResponse } from '../models';
 import { ProductsFilterDto } from '../models/productFilter.dto';
 
 const API_URL = `${environment.url}${API_PREFIX}movements`;
@@ -13,6 +13,8 @@ const API_URL_CATEGORY = `${environment.url}${API_PREFIX}categories`;
   providedIn: 'root',
 })
 export class WorkoutService {
+  
+  public product?: ArticleItemResponse | null = null;
   constructor(public http: HttpClient) {}
 
   getCategories(params?: ProductsFilterDto) {

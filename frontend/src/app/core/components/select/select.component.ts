@@ -8,6 +8,7 @@ import { ISelectItem } from '../../models/iselect.item';
   styleUrls: ['./select.component.scss'],
 })
 export class SelectComponent implements OnInit {
+  private _defaultValue!: string;
   @Input() id!: string;
   @Input() label!: string;
 
@@ -25,10 +26,17 @@ export class SelectComponent implements OnInit {
 
   constructor() {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.defaultValue = this.dataSource?.find((item) => item?.selected)?.value || '';
+  }
 
   get defaultValue() {
-    return this.dataSource?.find((item) => item.selected)?.value || '';
+    return this._defaultValue;  
+  }
+
+  set defaultValue(value: any) {
+    console.log('value', value);
+    //this._defaultValue = value;
   }
 
   handleChange(event: any) {

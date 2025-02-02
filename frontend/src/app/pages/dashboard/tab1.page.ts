@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs';
 import { OrderResponse } from './models/order.model';
 import { OrderService } from './services/order.service';
 import { ArticleItemResponse } from './models';
+import { WorkoutService } from './services/workout.service';
 
 @Component({
   selector: 'app-tab1',
@@ -21,7 +22,9 @@ export class Tab1Page implements OnInit, OnDestroy {
   constructor(
     private orderService: OrderService,
     public router: Router,
-    public activatedRoute: ActivatedRoute
+    public activatedRoute: ActivatedRoute,
+    public readonly productService: WorkoutService,
+
   ) {
     Chart.register(Annotation);
   }
@@ -179,8 +182,10 @@ export class Tab1Page implements OnInit, OnDestroy {
 
     this.chart?.update();
   }
-  public onItemClicked(item: OrderResponse): void {
-    this.orderService.itemSelected = item;
-    this.router.navigate(['tabs', 'tab1', 'order']);
+  public onItemClicked(item: ArticleItemResponse): void {
+    console.log(item);
+    
+    this.productService.product = item;
+    this.router.navigate(['tabs', 'tab1', 'detail'], );
   }
 }

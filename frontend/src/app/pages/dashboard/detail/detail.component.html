@@ -23,7 +23,7 @@
             [label]="'Concepto*'"
             [required]="true"
             [maxLength]="100"
-            [disabled]="!!product?.id || !!product?.name"></app-input>
+            [disabled]="!!productService.product?.id || !!productService.product?.name"></app-input>
         </div>
       </div>
 
@@ -48,34 +48,34 @@
             [label]="'Cantidad $*'"
             [required]="false"
             [maxLength]="100"
-            inputValue="{{ (quantity || '') }}"
+            inputValue="{{ quantity || '' }}"
             (inputValueChange)="changeQuantity($event)"></app-input>
         </div>
 
         <div class="w-1/2">
           <app-input
-          [id]="'outcome'"
-          [type]="'toggle'"
-          [label]="'Es Gasto'"
-          [placeholder]="'Es Gasto'"
-          [required]="false"
-          [inputValue]="'true'"
-          (inputValueChange)="changeOutcome($event)"></app-input>
+            [id]="'outcome'"
+            [type]="'toggle'"
+            [label]="'Es Gasto'"
+            [placeholder]="'Es Gasto'"
+            [required]="false"
+            [inputValue]="outcome ? 'true' : ''"
+            (inputValueChange)="changeOutcome($event)"></app-input>
         </div>
-
-
-
       </div>
 
       <div class="flex mt-4 w-full">
         <div class="w-full">
-          <app-select
-            [dataSource]="this.categories"
-            [disabled]="!this.categories || !this.categories.length"
-            [size]="'regular'"
-            [id]="'select'"
-            [label]="'Seleccionar categoria*'"
-            (inputValueChange)="changeSelect($event)"></app-select>
+          <ng-container *ngIf="this.categories?.length">
+            <app-select
+              [disabled]="!this?.categories?.length"
+              [dataSource]="this.categories"
+              [size]="'regular'"
+              [id]="'select'"
+              [label]="'Seleccionar categoria*'"
+              [placeholder]="'Seleccionar categoria*'"
+              (inputValueChange)="changeSelect($event)"></app-select>
+          </ng-container>
         </div>
       </div>
 

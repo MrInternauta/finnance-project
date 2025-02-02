@@ -14,7 +14,6 @@ import { WorkoutService } from '../services/workout.service';
   styleUrls: ['./detail.component.scss'],
 })
 export class DetailComponent implements OnDestroy, OnInit {
-  @Input() product?: ArticleItemResponse | null = null;
   name!: string;
   date!: string;
   quantity!: string;
@@ -26,7 +25,7 @@ export class DetailComponent implements OnDestroy, OnInit {
   categories!: Array<ISelectItem>;
   didSomeChange!: boolean;
   constructor(
-    private productService: WorkoutService,
+    public readonly productService: WorkoutService,
     private modalInfoService: ModalInfoService,
     private modalCtrl: ModalController,
     private pictureService: PictureService
@@ -57,23 +56,25 @@ export class DetailComponent implements OnDestroy, OnInit {
   }
 
   ngOnInit(): void {
-    if (this.product) {
-      this.name = this.product?.name;
-      this.date = this.product?.date.toISOString();
-      this.description = this.product?.description;
-      this.outcome = !this.product?.income;
-      this.categoryId = this.product?.category?.id?.toString() || '';
-      this.quantity = this.product?.quantity.toString();
-      console.log(this.product);
+    console.log(this.productService.product);
+    if (this.productService.product) {
+      
+      this.name = this.productService.product?.name;
+      this.date = this.productService.product?.date?.toString();
+      this.description = this.productService.product?.description;
+      this.outcome = !this.productService.product?.income;
+      this.categoryId = this.productService.product?.category?.id?.toString() || '';
+      this.quantity = this.productService.product?.quantity.toString();
+      console.log(this.productService.product);
     }
   }
 
   getImage() {
-    if (!this.product?.id) {
+    if (!this.productService.product?.id) {
       return;
     }
 
-    // this.pictureService.changePicture(this.product?.id ?? '', 'product');
+    // this.pictureService.changePicture(this.productService.product?.id ?? '', 'product');
   }
 
   getCategories() {
@@ -84,21 +85,21 @@ export class DetailComponent implements OnDestroy, OnInit {
             name: item.name,
             value: item.id.toString(),
             selected:
-              item.id?.toString()?.toLocaleLowerCase() === this.product?.category?.id?.toString()?.toLocaleLowerCase(),
+              item.id?.toString()?.toLocaleLowerCase() === this.productService.product?.category?.id?.toString()?.toLocaleLowerCase(),
           };
         }) || [];
     });
   }
 
-  public cancel() {
-    this.removeSubscription();
-    return this.modalCtrl.dismiss(null, 'cancel');
-  }
+  // public cancel() {
+  //   this.removeSubscription();
+  //   return this.modalCtrl.dismiss(null, 'cancel');
+  // }
 
   confirm() {
     this.fillEmptyForm();
 
-    // if (!this.product || (this.product?.code && !this.product?.id)) {
+    // if (!this.productService.product || (this.productService.product?.code && !this.productService.product?.id)) {
     //   const product: ArticleCreate = {
     //     name: this.name,
     //     code: this.code,
@@ -109,7 +110,7 @@ export class DetailComponent implements OnDestroy, OnInit {
     //     categoryId: this.categoryId,
     //   };
 
-    //   this.subscription$ = this.productService.postProduct(product).subscribe(
+    //   this.subscription$ = this.productService.productService.postProduct(product).subscribe(
     //     res => {
     //       this.removeSubscription();
     //       this.modalInfoService.success('El producto fue creado!', '');
@@ -123,7 +124,7 @@ export class DetailComponent implements OnDestroy, OnInit {
     // }
 
     // const product: ArticleCreate = {
-    //   id: Number(this.product.id),
+    //   id: Number(this.productService.product.id),
     //   name: this.name,
     //   code: this.code,
     //   stock: this.stock,
@@ -132,7 +133,7 @@ export class DetailComponent implements OnDestroy, OnInit {
     //   description: this.description,
     //   categoryId: this.categoryId,
     // };
-    // this.subscription$ = this.productService.putProduct(this.product.id, product).subscribe(
+    // this.subscription$ = this.productService.productService.putProduct(this.productService.product.id, product).subscribe(
     //   res => {
     //     this.removeSubscription();
     //     this.modalInfoService.success('El producto fue actualizado!', '');
@@ -150,7 +151,7 @@ export class DetailComponent implements OnDestroy, OnInit {
   }
 
   public changeDate(event: Date) {
-    this.date = event?.toISOString() || '';
+    this.date = event?.toString() || '';
     this.didSomeChange = true;
   }
 
@@ -169,8 +170,10 @@ export class DetailComponent implements OnDestroy, OnInit {
     this.didSomeChange = true;
   }
 
-  public changeSelect(event: string) {
-    this.categoryId = event;
+  public changeSelect(event: any) {
+    console.log(event);
+    
+    // this.categoryId = event;
     this.didSomeChange = true;
   }
 
@@ -182,13 +185,13 @@ export class DetailComponent implements OnDestroy, OnInit {
 
   removeSubscription() {
     this.subscription$?.unsubscribe();
-    // this.subscriptionCategories$?.unsubscribe();
+    this.subscriptionCategories$?.unsubscribe();
     this.name = '';
-    this.date = new Date()?.toISOString() || '';
+    this.date = new Date()?.toString();
     this.quantity = '';
     this.outcome = true;
     this.description = '';
-    this.product = null;
+    this.productService.product = null;
   }
 
   ngOnDestroy(): void {

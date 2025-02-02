@@ -10,7 +10,7 @@ import { Tab2Page } from './tab2.page';
 
 @NgModule({
   imports: [IonicModule, CommonModule, FormsModule, Tab2PageRoutingModule, ComponentsModule],
-  declarations: [Tab2Page, DetailComponent],
-  exports: [Tab2Page, DetailComponent],
+  declarations: [Tab2Page],
+  exports: [Tab2Page],
 })
 export class Tab2PageModule {}
