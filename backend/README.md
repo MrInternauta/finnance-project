@@ -99,3 +99,26 @@ User to Customer
 sudo chown -R $(whoami) ~/.docker
 ❯ npx gulp --command="migrations:generate"
 ❯ npx gulp --command="migrations:run"
+
+
+## Env config
+```
+API_KEY=12345a
+
+
+POSTGRES_DB=mydb
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_PORT=5432
+POSTGRES_HOST=postgres_service_finnance
+
+POSTGRES_PORT_EXTERNAL=5430
+POSTGRES_HOST_EXTERNAL=localhost
+
+
+JWT_SECRET=abcde123
+JWT_EXPIRES_IN=24h
+
+IMAGES_PATH=files/images
+
+```
