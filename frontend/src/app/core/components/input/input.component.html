@@ -52,7 +52,8 @@
           'block rounded-md border-0 text-center': size === 'small',
           'px-4 py-3.5': size !== 'small',
         }">
-        <ion-toggle [enableOnOffLabels]="true" [checked]="!!inputValue" >{{placeholder}}</ion-toggle>
+        <ion-toggle [enableOnOffLabels]="true" [checked]="!!inputValue" (ionChange)="handleChange($event)"
+        >{{placeholder}}</ion-toggle>
       </div>
     </ng-container>
 
@@ -70,6 +71,7 @@
       <ion-modal [keepContentsMounted]="true">
         <ng-template>
           <ion-datetime
+          (ionChange)="handleChange($event)"
             locale="es-ES"
             id="datetime"
             presentation="date-time"
@@ -77,7 +79,8 @@
             [value]="inputValue || null"
             doneText="Listo"
             cancelText="Cancelar">
-            <span slot="time-label">Tiempo</span>
+            <span slot="time-label"
+            >Tiempo</span>
           </ion-datetime>
         </ng-template>
       </ion-modal>

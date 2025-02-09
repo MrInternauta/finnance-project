@@ -40,10 +40,19 @@ export class InputComponent implements OnInit {
     if (this.type === 'currency') {
       //was handling the onFocusout currency method
       return;
+    } 
+    else if (this.type == 'toggle') {
+      this.inputValueChange.emit(event?.detail?.checked || false);
     }
-    this.inputValueChange.emit(event);
-  }
 
+    else if (this.type == 'date') {
+      this.inputValueChange.emit(event?.detail?.value);
+    }
+    else {
+      this.inputValueChange.emit(event);
+    }
+  }
+  
    /**
    * Blur
    * @param eventName 'focusout' is the key
@@ -59,7 +68,9 @@ export class InputComponent implements OnInit {
       event.target.value = currency.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
       this.inputValue =  event?.target?.value
       console.log(this.inputValue); // This will get printed on blur
-      this.inputValueChange.emit(this.inputValue);
+      //rewmove $ sign and commas from the currency value
+      const value = this.inputValue.replace(/[^0-9.]/g, '');
+      this.inputValueChange.emit(value);
     }
    }
 

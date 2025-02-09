@@ -47,19 +47,23 @@ export class AuthInterceptor implements HttpInterceptor {
       }),
       catchError(error => {
         //this.modalInfoService.error();
-        this.modalInfoService.error(error?.error?.message || 'Something is wrong', '');
-
-        console.log(error?.error?.message);
+        let newMessage!: string;
+        if (error.error.message && Array.isArray(error.error.message)) {
+          // if error.error.message is an array, it will be converted to a string dot list and capitalized first letter.
+          newMessage = error.error.message.map((m: string) => ` - ${m.charAt(0).toUpperCase() + m.slice(1)}`).join('<br>');
+        }
+        
+        const err = newMessage || error.error.message || error.statusText;
+        this.modalInfoService.error('Something is wrong', err ||  '');
 
         if (error instanceof HttpErrorResponse) {
           if (error.status === StatusCodes.UNAUTHORIZED) {
             // check for unauthorized error and redirect to login page.
             this.redirect();
             const err = error.error.message || error.statusText;
-            return throwError(err);
+            return throwError('Something is wrong', err ||  '');
           }
         }
-        const err = error.error.message || error.statusText;
         return throwError(err);
       })
     );

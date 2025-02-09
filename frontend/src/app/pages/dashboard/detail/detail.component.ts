@@ -7,6 +7,7 @@ import { ModalInfoService } from '../../../core/services/modal.service';
 import { PictureService } from '../../../core/services/picture.service';
 import { ArticleCreate, ArticleItemResponse } from '../models';
 import { WorkoutService } from '../services/workout.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-detail',
@@ -28,7 +29,8 @@ export class DetailComponent implements OnDestroy, OnInit {
     public readonly productService: WorkoutService,
     private modalInfoService: ModalInfoService,
     private modalCtrl: ModalController,
-    private pictureService: PictureService
+    private pictureService: PictureService,
+    public router: Router,
   ) {
     this.getCategories();
   }
@@ -36,10 +38,6 @@ export class DetailComponent implements OnDestroy, OnInit {
   get isValidForm() {
     //Required fields
     if (!this.name) {
-      return false;
-    }
-
-    if (!this.date) {
       return false;
     }
 
@@ -97,52 +95,45 @@ export class DetailComponent implements OnDestroy, OnInit {
   // }
 
   confirm() {
+
+    console.log(this.name, this.date, this.quantity, this.outcome, this.description, this.categoryId);
+    
     this.fillEmptyForm();
+    //method that use productService to post or put a product
+    //build the object to send to the service
+    // and validate fields before sending or keep those as null
+    const product: ArticleCreate = {
+      name: this.name,
+      date: this.date ? new Date(this.date): new Date(),
+      quantity: parseInt(this.quantity || '0'),
+      income: !this.outcome,
+      description: this.description,
+      categoryId: Number(this.categoryId || 6), //default category is 6 (others)
+    };
 
-    // if (!this.productService.product || (this.productService.product?.code && !this.productService.product?.id)) {
-    //   const product: ArticleCreate = {
-    //     name: this.name,
-    //     code: this.code,
-    //     stock: this.stock,
-    //     price: this.price,
-    //     priceSell: this.price_sell,
-    //     description: this.description,
-    //     categoryId: this.categoryId,
-    //   };
+    console.log(product);
+    //determine if it is a post or put by the existence of the product id
+    this.subscription$ = (product.id  ? this.productService.putProduct(String(this.productService.product?.id), product) : this.productService.postProduct(product))
+    
+    //handle put or post response
+    .subscribe(
+      (response: ArticleItemResponse) => {
+        console.log(response);
+        this.modalInfoService.success('Success!', 'Movement saved successfully');
+        this.removeSubscription();
+        this.modalCtrl.dismiss(response, 'confirm');
+        //move to dashboard page and refresh the list
+        this.router.navigate(['tabs', 'tab1', 'detail'], );
+        this.removeSubscription();
+        
 
-    //   this.subscription$ = this.productService.productService.postProduct(product).subscribe(
-    //     res => {
-    //       this.removeSubscription();
-    //       this.modalInfoService.success('El producto fue creado!', '');
-    //       return this.modalCtrl.dismiss(res, 'created');
-    //     },
-    //     error => {
-    //       console.log(error);
-    //     }
-    //   );
-    //   return;
-    // }
 
-    // const product: ArticleCreate = {
-    //   id: Number(this.productService.product.id),
-    //   name: this.name,
-    //   code: this.code,
-    //   stock: this.stock,
-    //   price: this.price,
-    //   priceSell: this.price_sell,
-    //   description: this.description,
-    //   categoryId: this.categoryId,
-    // };
-    // this.subscription$ = this.productService.productService.putProduct(this.productService.product.id, product).subscribe(
-    //   res => {
-    //     this.removeSubscription();
-    //     this.modalInfoService.success('El producto fue actualizado!', '');
-    //     return this.modalCtrl.dismiss(res, 'updated');
-    //   },
-    //   error => {
-    //     console.log(error);
-    //   }
-    // );
+      },
+      error => {
+        console.log(error);
+        // this.modalInfoService.error('Error saving product');
+      });
+
   }
 
   public changeName(event: string) {
@@ -173,7 +164,7 @@ export class DetailComponent implements OnDestroy, OnInit {
   public changeSelect(event: any) {
     console.log(event);
     
-    // this.categoryId = event;
+    this.categoryId = event;
     this.didSomeChange = true;
   }
 
