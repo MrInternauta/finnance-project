@@ -129,7 +129,13 @@ export class Tab1Page implements OnInit, OnDestroy {
     this.subscription$?.unsubscribe();
     this.historyWorkout = [];
   }
-
+  
+  get totalIncome(): number {
+    return this.historyWorkout.reduce((acc, item) => item.income ? acc + item.quantity : acc, 0) || 0;
+  }
+  get totalOutcome(): number {
+    return this.historyWorkout.reduce((acc, item) => !item.income ? acc + item.quantity : acc, 0) || 0;
+  }
 
   private static generateNumber(i: number): number {
     return Math.floor(Math.random() * (i < 2 ? 100 : 1000) + 1);

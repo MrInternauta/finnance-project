@@ -20,6 +20,14 @@
 <ion-content [fullscreen]="true">
   <div class="flex min-h-full flex-col justify-start px-4 py-4 lg:px-6">
     <div class="sm:mx-auto sm:w-full sm:max-w-sm md:max-w-md">
+      <ion-card color="success" *ngIf="lineChartData.datasets[0].data" id="income">
+        <ion-card-content> Ingresos ${{totalIncome}}</ion-card-content>
+      </ion-card>
+      
+      <ion-card color="danger" *ngIf="lineChartData.datasets[1].data" >
+        <ion-card-content> Gastos ${{totalOutcome}}</ion-card-content>
+      </ion-card>
+
       <canvas
         *ngIf="true" 
         baseChart
