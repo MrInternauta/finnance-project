@@ -8,7 +8,7 @@ import { ISelectItem } from '../../models/iselect.item';
   styleUrls: ['./select.component.scss'],
 })
 export class SelectComponent implements OnInit {
-  private _defaultValue!: string;
+  @Input() defaultValue!: string;
   @Input() id!: string;
   @Input() label!: string;
 
@@ -27,19 +27,12 @@ export class SelectComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    this.defaultValue = this.dataSource?.find((item) => item?.selected)?.value || '';
-  }
-
-  get defaultValue() {
-    return this._defaultValue;  
-  }
-
-  set defaultValue(value: any) {
-    console.log('value', value);
-    //this._defaultValue = value;
+    this.dataSource = this.dataSource || [];
+    this.dataSource = this.dataSource.map((item) => { return { ...item, selected: item.value === this.defaultValue } });
   }
 
   handleChange(event: any) {
+    this.dataSource = this.dataSource.map((item) => { return { ...item, selected: item.value === this.defaultValue } });
     this.inputValueChange.emit(event.detail.value);
   }
 
@@ -52,6 +45,8 @@ export class SelectComponent implements OnInit {
   }
 
   compareFn(e1: ISelectItem, e2: ISelectItem): boolean {
-    return e1 && e2 ? e1.value == e2.value : e1 == e2;
+    //avoid mark as selected all the items
+    return e1.name === e2.name;
   }
+
 }

@@ -26,7 +26,6 @@ export class MovementsService {
       where.name = params.name;
     }
 
-
     if (params?.categoryId) {
       where.category = { id: params.categoryId };
     }
@@ -36,6 +35,7 @@ export class MovementsService {
       take: limit,
       skip: offset,
       where,
+      order: { date: 'DESC' },
     });
 
     console.log(res);

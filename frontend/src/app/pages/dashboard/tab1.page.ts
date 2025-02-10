@@ -29,63 +29,42 @@ export class Tab1Page implements OnInit, OnDestroy {
     Chart.register(Annotation);
   }
 
-  ngOnInit(): void {
-    this.subscription$ = this.orderService.getOrders().subscribe(response => {
-      this.historyWorkout = response?.movements || [];
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.subscription$?.unsubscribe();
-    this.historyWorkout = [];
-  }
-
   public lineChartData: ChartConfiguration['data'] = {
     datasets: [
-      {
-        data: [65, 59, 80, 81, 56, 55, 40],
-        label: 'Series A',
-        backgroundColor: 'rgba(148,159,177,0.2)',
-        borderColor: 'rgba(148,159,177,1)',
-        pointBackgroundColor: 'rgba(148,159,177,1)',
-        pointBorderColor: '#fff',
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgba(148,159,177,0.8)',
-        fill: 'origin',
-      },
-      {
-        data: [28, 48, 40, 19, 86, 27, 90],
-        label: 'Series B',
-        backgroundColor: 'rgba(77,83,96,0.2)',
-        borderColor: 'rgba(77,83,96,1)',
-        pointBackgroundColor: 'rgba(77,83,96,1)',
-        pointBorderColor: '#fff',
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgba(77,83,96,1)',
-        fill: 'origin',
-      },
-      {
-        data: [180, 480, 770, 90, 1000, 270, 400],
-        label: 'Series C',
-        yAxisID: 'y1',
-        backgroundColor: 'rgba(255,0,0,0.3)',
-        borderColor: 'red',
-        pointBackgroundColor: 'rgba(148,159,177,1)',
-        pointBorderColor: '#fff',
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgba(148,159,177,0.8)',
-        fill: 'origin',
-      },
+        {
+          data: [65, 59, 80, 81, 56, 55, 40],
+          label: 'Ingresos',
+          yAxisID: 'y1',
+          backgroundColor: 'rgba(22,163,74,0.3)',
+          borderColor: '#16a34a',
+          pointBackgroundColor: 'rgba(148,159,177,1)',
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: 'rgba(148,159,177,0.8)',
+          fill: 'origin',
+        },
+        {
+          data: [180, 480, 770, 90, 1000, 270, 400],
+          label: 'Gastos',
+          yAxisID: 'y1',
+          backgroundColor: 'rgba(220,38,38,0.3)',
+          borderColor: '#dc2626',
+          pointBackgroundColor: 'rgba(148,159,177,1)',
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: 'rgba(148,159,177,0.8)',
+          fill: 'origin',
+        },          
     ],
     labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
   };
 
   public lineChartOptions: ChartConfiguration['options'] = {
-    elements: {
-      line: {
-        tension: 0.5,
-      },
-    },
+    // elements: {
+    //   line: {
+    //     tension: 0.5,
+    //   },
+    // },
     scales: {
       // We use this empty structure as a placeholder for dynamic theming.
       y: {
@@ -94,7 +73,7 @@ export class Tab1Page implements OnInit, OnDestroy {
       y1: {
         position: 'right',
         grid: {
-          color: 'rgba(255,0,0,0.3)',
+          color: 'rgba(0,0,0,0)',
         },
         ticks: {
           color: 'red',
@@ -102,34 +81,55 @@ export class Tab1Page implements OnInit, OnDestroy {
       },
     },
 
-    plugins: {
-      legend: { display: true },
-      annotation: {
-        annotations: [
-          {
-            type: 'line',
-            scaleID: 'x',
-            value: 'March',
-            borderColor: 'orange',
-            borderWidth: 2,
-            label: {
-              display: true,
-              position: 'center',
-              color: 'orange',
-              content: 'LineAnno',
-              font: {
-                weight: 'bold',
-              },
-            },
-          },
-        ],
-      },
-    },
+    // plugins: {
+    //   legend: { display: true },
+    //   annotation: {
+    //     annotations: [
+    //       {
+    //         type: 'line',
+    //         scaleID: 'x',
+    //         value: 'March',
+    //         borderColor: 'orange',
+    //         borderWidth: 2,
+    //         label: {
+    //           display: true,
+    //           position: 'center',
+    //           color: 'orange',
+    //           content: 'LineAnno',
+    //           font: {
+    //             weight: 'bold',
+    //           },
+    //         },
+    //       },
+    //     ],
+    //   },
+    // },
   };
 
   public lineChartType: ChartType = 'line';
 
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
+
+  ngOnInit(): void {
+    this.subscription$ = this.orderService.getOrders().subscribe(response => {
+      this.historyWorkout = response?.movements || [];
+      //asign the response type to the lineChartData.datasets object data depending on the income value (income to [0], outcome to [1])
+      this.lineChartData.datasets[0].data = this.historyWorkout.map(item => item.income ? item.quantity : 0);
+      this.lineChartData.datasets[1].data = this.historyWorkout.map(item => !item.income ? item.quantity : 0);
+      //assign this.lineChartData.labels = this.historyWorkout.map(item => item.date);  with a date short format like 'dd/MM'
+      this.lineChartData.labels = this.historyWorkout.map(item =>{
+        const date = new Date(item.date);
+        return `${date.getDate()}/${date.getMonth()}`;
+      });
+
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.subscription$?.unsubscribe();
+    this.historyWorkout = [];
+  }
+
 
   private static generateNumber(i: number): number {
     return Math.floor(Math.random() * (i < 2 ? 100 : 1000) + 1);

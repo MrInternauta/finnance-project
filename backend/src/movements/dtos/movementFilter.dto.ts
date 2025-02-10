@@ -13,7 +13,12 @@ export class MovementsFilterDto extends FilterDto {
   @IsOptional()
   @IsDate()
   @ApiProperty({ description: 'date for movement' })
-  date: Date;
+  startDate: Date;
+
+  @IsOptional()
+  @IsDate()
+  @ApiProperty({ description: 'date for movement' })
+  endDate: Date;
 
   @IsOptional()
   @IsNumber()
@@ -24,6 +29,6 @@ export class MovementsFilterDto extends FilterDto {
   userId?: number;
 
   @IsOptional()
-  @IsBoolean()
-  income?: boolean;
+  @IsString()
+  type?: 'income' | 'expense' | 'all' = 'all';
 }

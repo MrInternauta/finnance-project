@@ -113,7 +113,7 @@ export class DetailComponent implements OnDestroy, OnInit {
 
     console.log(product);
     //determine if it is a post or put by the existence of the product id
-    this.subscription$ = (product.id  ? this.productService.putProduct(String(this.productService.product?.id), product) : this.productService.postProduct(product))
+    this.subscription$ = (this.productService.product?.id ? this.productService.putProduct(String(this.productService.product?.id), product) : this.productService.postProduct(product))
     
     //handle put or post response
     .subscribe(

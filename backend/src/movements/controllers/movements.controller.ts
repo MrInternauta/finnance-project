@@ -56,7 +56,7 @@ export class MovementsController {
   })
   @HttpCode(HttpStatus.OK)
   async getmovements(
-    @Query() params: MovementsFilterDto & FilterDto
+    @Query() params: MovementsFilterDto
     // @Query('offset') offset = 10,
   ) {
     return { movements: await this.movementsService.findAll(params) };
