@@ -8,6 +8,7 @@ services:
       - devred
     ports:
       - 3000:3000
+      - 9229:9229
   postgres_service_finnance:
     container_name: postgres_dev_finnance
     env_file:
