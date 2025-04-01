@@ -34,5 +34,6 @@ jobs:
           image: mrinternauta/finnance-backend
           registry: docker.io
           dockerfile: backend/dockerfile
+          directory: backend
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
