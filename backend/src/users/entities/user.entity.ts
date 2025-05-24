@@ -2,8 +2,8 @@ import { Exclude } from 'class-transformer';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { BasicEntity } from '../../core/interfaces/basic.entity';
-import { Role } from './role.entity';
 import { Product } from '../../movements/entities/movement.entity';
+import { Role } from './role.entity';
 
 @Entity()
 export class User extends BasicEntity {
@@ -19,7 +19,7 @@ export class User extends BasicEntity {
   @Column({ type: 'varchar', length: 255 })
   phone: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   image;
 
   @Column({ type: 'varchar', length: 255, unique: true })

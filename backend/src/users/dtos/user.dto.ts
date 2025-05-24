@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
-import { IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class UserDto {
   @IsString()
@@ -18,7 +18,7 @@ export class UserDto {
   @ApiProperty()
   readonly image: string;
 
-  @IsPhoneNumber('MX', { message: 'El numero de teléfono no es valido', always: false })
+  // @IsPhoneNumber('MX', { message: 'El numero de teléfono no es valido', always: false })
   @IsNotEmpty()
   @ApiProperty()
   readonly phone: string;
@@ -38,6 +38,5 @@ export class UserDto {
   @IsOptional()
   readonly role?: number;
 }
-
 
 export class UpdateUserDto extends PartialType(UserDto) {}
