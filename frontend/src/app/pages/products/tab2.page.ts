@@ -1,7 +1,6 @@
 /* eslint-disable @angular-eslint/no-empty-lifecycle-method */
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BarcodeScanner } from '@awesome-cordova-plugins/barcode-scanner/ngx';
 import { AlertController, ModalController, ToastController } from '@ionic/angular';
 import { Store } from '@ngrx/store';
 // eslint-disable-next-line
@@ -13,7 +12,6 @@ import { DetailComponent } from '../dashboard/detail/detail.component';
 import { ArticleCreate, ArticleItemResponse, CategoryItemResponse } from '../dashboard/models';
 import { ProductsFilterDto } from '../dashboard/models/productFilter.dto';
 import { WorkoutService } from '../dashboard/services/workout.service';
-import { loadedExercise } from '../dashboard/state/workout.actions';
 
 @Component({
   selector: 'app-tab2',
@@ -38,7 +36,6 @@ export class Tab2Page implements OnDestroy, OnInit {
   constructor(
     private toastController: ToastController,
     private store: Store<AppState>,
-    private barcodeScanner: BarcodeScanner,
     public router: Router,
     public activatedRoute: ActivatedRoute,
     private alertController: AlertController,
@@ -106,42 +103,6 @@ export class Tab2Page implements OnDestroy, OnInit {
     );
   }
 
-  async scanCode() {
-    try {
-      const barcodeData = await this.barcodeScanner.scan();
-      console.log('Barcode data', barcodeData);
-      if (!barcodeData.text) {
-        console.log('Invalid code');
-      }
-      this.searchbyCode(barcodeData.text || '');
-    } catch (error) {
-      if (error == 'cordova_not_available') {
-        const alert = await this.alertController.create({
-          header: 'Scanner no disponible',
-          message: '¿Quieres buscarlo manualmente?',
-          buttons: [
-            {
-              text: 'Buscar',
-              role: 'cancel',
-              cssClass: 'secondary',
-              handler: () => {
-                this.focusButton();
-              },
-            },
-            {
-              text: 'Cancelar',
-              handler: () => {},
-            },
-          ],
-        });
-        alert.present();
-
-        return;
-      }
-      console.log('Error', error);
-    }
-  }
-
   searchFunction($termSearch: any) {
     const value = $termSearch;
     if (!value || value?.length < 3) {
@@ -153,7 +114,8 @@ export class Tab2Page implements OnDestroy, OnInit {
         item_?.Exercise?.products.filter(
           (item: ArticleItemResponse) =>
             String(item.name).toLocaleLowerCase().includes(String(value).toLocaleLowerCase()) ||
-            String(item.description).toLocaleLowerCase().includes(String(value).toLocaleLowerCase())         )
+            String(item.description).toLocaleLowerCase().includes(String(value).toLocaleLowerCase())
+        )
       )
     );
   }
@@ -187,8 +149,7 @@ export class Tab2Page implements OnDestroy, OnInit {
               },
               {
                 text: 'Registrar',
-                handler: () => {
-                },
+                handler: () => {},
               },
             ],
           });

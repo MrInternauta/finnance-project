@@ -5,17 +5,16 @@
       <app-filter-popover></app-filter-popover>
     </ion-buttons> -->
   </ion-toolbar>
-  
+
   <ion-toolbar>
-    <ion-searchbar class="sm:mx-[25%] sm:w-auto"
-    show-cancel-button="focus"
-    show-clear-button="never"
-    cancel-button-icon="trash"
-    placeholder="Buscar..."
-    ></ion-searchbar>
+    <ion-searchbar
+      class="sm:mx-[25%] sm:w-auto"
+      show-cancel-button="focus"
+      show-clear-button="never"
+      cancel-button-icon="trash"
+      placeholder="Buscar..."></ion-searchbar>
   </ion-toolbar>
 </ion-header>
-
 
 <ion-content [fullscreen]="true">
   <div class="flex min-h-full flex-col justify-start px-4 py-4 lg:px-6">
@@ -23,47 +22,39 @@
       <ion-card color="success" *ngIf="lineChartData.datasets[0].data" id="income">
         <ion-card-content> Ingresos ${{totalIncome}}</ion-card-content>
       </ion-card>
-      
-      <ion-card color="danger" *ngIf="lineChartData.datasets[1].data" >
+
+      <ion-card color="danger" *ngIf="lineChartData.datasets[1].data">
         <ion-card-content> Gastos ${{totalOutcome}}</ion-card-content>
       </ion-card>
 
       <canvas
-        *ngIf="true" 
+        *ngIf="true"
         baseChart
         class="chart"
         [data]="lineChartData"
         [options]="lineChartOptions"
         [type]="lineChartType"
         (chartHover)="chartHovered($event)"
-        (chartClick)="chartClicked($event)"
-      ></canvas>
-      <div
-        *ngIf="!historyWorkout?.length"
-        class="flex min-h-full flex-col justify-center"
-      >
+        (chartClick)="chartClicked($event)"></canvas>
+      <div *ngIf="!historyWorkout?.length" class="flex min-h-full flex-col justify-center">
         <div class="sm:mx-auto sm:w-full sm:max-w-sm md:max-w-md">
-          <h2
-            class="mt-4 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900"
-          >
-            Sin movimientos!
-          </h2>
+          <h2 class="mt-4 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Sin movimientos!</h2>
         </div>
       </div>
       <ion-list *ngIf="historyWorkout?.length">
-        <ng-container *ngFor="let workout of historyWorkout" >
-          <ion-item detail="true" class="w-full"
-          (click)="onItemClicked(workout)"
-          >
-          <ion-badge slot="end" [color]=" workout?.income ? 'success': 'danger' ">{{workout?.quantity | currency}}</ion-badge>
-          <div class="flex flex-col mb-2">
-            <p class="font-bold leading-9 tracking-tight mb-1 uppercase">{{workout?.name}}</p>
-            <ion-label>
-              <p *ngIf="workout?.category"  >Categoria: {{ workout?.category?.name }}</p>
-              <p *ngIf="workout?.description" >Descripcion: {{ workout?.description }}</p>
-              <p>Fecha: {{workout?.date | date}}</p>
-            </ion-label>
-          </div>
+        <ng-container *ngFor="let workout of historyWorkout">
+          <ion-item detail="true" class="w-full" (click)="onItemClicked(workout)">
+            <ion-badge slot="end" [color]=" workout?.income ? 'success': 'danger' "
+              >{{workout?.quantity | currency}}</ion-badge
+            >
+            <div class="flex flex-col mb-2">
+              <p class="font-bold leading-9 tracking-tight mb-1 uppercase">{{workout?.name}}</p>
+              <ion-label>
+                <p *ngIf="workout?.category">Categoria: {{ workout?.category?.name }}</p>
+                <p *ngIf="workout?.description">Descripcion: {{ workout?.description }}</p>
+                <p>Fecha: {{workout?.date | date}}</p>
+              </ion-label>
+            </div>
           </ion-item>
         </ng-container>
       </ion-list>
