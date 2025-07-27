@@ -1,13 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, UntypedFormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '@gymTrack/auth';
+import { AppState, Auth, ComponentBase } from '@gymTrack/core';
+import { isEmail } from '@gymTrack/core/util/validator.helper';
 import { Store } from '@ngrx/store';
-
-// import  socialIcons  from './../../../../assets/data/pages/social-items.json';
-import { ComponentBase } from '../../../core/base/component.base';
-import { ModalInfoService } from '../../../core/services/modal.service';
-import { AppState } from '../../../core/state/app.reducer';
-import { AuthService } from '../../services';
+import { UserDto } from '../../model/user.dto';
 
 @Component({
   selector: 'app-login',
@@ -15,54 +12,92 @@ import { AuthService } from '../../services';
   styleUrls: ['./login.page.scss'],
 })
 export class LoginPage extends ComponentBase implements OnInit, OnDestroy {
-  loginForm!: FormGroup;
   isLoading = false;
-  error = false;
   passwordVisible = false;
-  validateForm!: UntypedFormGroup;
-  // socialMediaButtons = socialIcons.socialMediaButtons;
+  email!: string;
+  password!: string;
+  public hasError: {
+    email: string;
+    password: string;
+    login: string;
+  } = {
+    email: '',
+    password: '',
+    login: '',
+  };
+  recuerdame = false;
   constructor(
     private _authService: AuthService,
     private _store: Store<AppState>,
-    private fb: FormBuilder,
-    private router: Router,
-    private modalInfoService: ModalInfoService
+    public router: Router
   ) {
     super();
+    const email = localStorage.getItem('email') ?? '';
+    if (email.length > 3 && isEmail(email)) {
+      this.recuerdame = true;
+      this.email = email;
+    }
+    this.hasError = {
+      email: '',
+      password: '',
+      login: '',
+    };
+    this.email = 'admin@admin.com';
+    this.password = '1234567890';
   }
 
   ngOnInit() {
-    this.validateForm = this.fb.group({
-      email: ['admin@admin.com', [Validators.required]],
-      password: ['1234567890', [Validators.required, Validators.minLength(5)]],
-      remember: [true],
-    });
     return;
   }
-
-  submitForm(): void {
-    if (this.validateForm.valid) {
-      this._authService.login(this.validateForm.value, this.validateForm.value.remember).subscribe(
-        res => {
-          if (!res) {
-            this.modalInfoService.error('Something is wrong', '');
-            this.validateForm.hasError('Something is wrong');
-            return;
-          }
-          this.router.navigate(['tabs', 'tab1'], { replaceUrl: true });
-        },
-        login => {
-          this.modalInfoService.error('Something is wrong', login || '');
-          this.validateForm.hasError('Something is wrong');
-        }
-      );
-    } else {
-      Object.values(this.validateForm.controls).forEach(control => {
-        if (control.invalid) {
-          control.markAsDirty();
-          control.updateValueAndValidity({ onlySelf: true });
-        }
-      });
+  handleEmail(value: string) {
+    this.email = value;
+  }
+  handlePassword(value: string) {
+    this.password = value;
+  }
+  onSubmit() {
+    if (!this.email) {
+      this.hasError.email = 'Email address is needed';
+      return;
     }
+
+    if (!this.password) {
+      this.hasError.password = 'Password is needed';
+      return;
+    }
+
+    const auth: Auth = {
+      email: this.email,
+      password: this.password,
+    };
+    //TODO: Get permissions
+    this._authService.login(auth as UserDto, this.recuerdame).subscribe(
+      res => {
+        this.hasError = {
+          email: '',
+          password: '',
+          login: '',
+        };
+        if (!res) {
+          this.hasError.login = 'Something is wrong!';
+          return;
+        }
+        this.router.navigate(['tabs'], { replaceUrl: true });
+      },
+      login => {
+        console.log(login);
+
+        this.hasError = {
+          email: '',
+          password: '',
+          login,
+        };
+        this.hasError.login = 'Something is wrong!';
+      }
+    );
+  }
+  resetPassword() {}
+  siginupRedirect() {
+    this.router.navigate(['signup'], { replaceUrl: true });
   }
 }

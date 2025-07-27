@@ -12,27 +12,20 @@ import { EffectsModule } from '@ngrx/effects';
 
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { BarcodeScanner } from '@awesome-cordova-plugins/barcode-scanner/ngx';
 import { Network } from '@awesome-cordova-plugins/network/ngx';
-import { FullCalendarModule } from '@fullcalendar/angular';
 import { AngularSvgIconModule } from 'angular-svg-icon';
-import { NgApexchartsModule } from 'ng-apexcharts';
-import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NgChartsModule } from 'ng2-charts';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { PermissionsEffects } from './auth/state/permissions.effects';
-import { CommonLayoutComponent } from './layouts/common-layout/common-layout.component';
 import { ExercisesEffects } from './pages/dashboard/state/workout.effects';
-import { ThemeConstantService } from './shared/services/theme-constant.service';
-import { SharedModule } from './shared/shared.module';
-import { TemplateModule } from './shared/template/template.module';
 
 registerLocaleData(en);
 
 @NgModule({
-  declarations: [AppComponent, CommonLayoutComponent],
+  declarations: [
+    AppComponent,
+    // CommonLayoutComponent
+  ],
   bootstrap: [AppComponent],
   imports: [
     BrowserModule,
@@ -42,25 +35,16 @@ registerLocaleData(en);
     AuthModule,
     EffectsModule.forRoot([ExercisesEffects, PermissionsEffects]),
     FormsModule,
-    TemplateModule,
-    SharedModule,
-    NzBreadCrumbModule,
-    NzSpinModule,
-    NgChartsModule,
-    NgApexchartsModule,
-    FullCalendarModule,
     AngularSvgIconModule.forRoot(),
   ],
   providers: [
     Network,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    BarcodeScanner,
     { provide: NZ_I18N, useValue: en_US },
     {
       provide: LocationStrategy,
       useClass: PathLocationStrategy,
     },
-    ThemeConstantService,
     provideHttpClient(withInterceptorsFromDi()),
   ],
 })

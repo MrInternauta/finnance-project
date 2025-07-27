@@ -1,4 +1,4 @@
 export const environment = {
-  url: 'http://nestpos.eba-i2uaxmst.us-east-1.elasticbeanstalk.com/',
+  url: 'http://192.168.100.51:3000/',
   production: true,
 };
