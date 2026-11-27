@@ -9,14 +9,14 @@ Date: 2026-11-27 · Requirements: [`PRD.md`](PRD.md) · Architecture: [`../CLAUD
 - Local env conflict: ports **3000** and **5430** are used by the POS-Nest project
   (`POS/POS-Nest` node process + `postgres_dev` container). Stop it or remap ports before
   `docker-compose up`. A throwaway `finnance_test_pg` container on **5433** is used for e2e.
-- DeepWiki not indexed for this repo yet.
+- DeepWiki not indexed for this repository yet.
 - Frontend production build (`ng build`) fails on Google Fonts inlining in sandboxed envs
-  (Node https blocked); verified via `--configuration development`.
+  (Node HTTPS requests blocked); verified via `--configuration development`.
 
 ## Phase 0 — Housekeeping (½ day)
 
 - [ ] Commit rename changes; add `.DS_Store` to `.gitignore`. *(still pending)*
-- [ ] Index repo on DeepWiki. *(still pending)*
+- [ ] Index repository on DeepWiki. *(still pending)*
 - [x] Remove remaining POS leftovers (Swagger title → "Finnance API", `readme.md` →
       "NestJS - Backend", `validateUniqueCode`, `findOnebyCode`). — Batch A
 - [x] Remove toy tests in `backend/test/fortesting` (sum/palindrome). — Batch A

@@ -65,6 +65,47 @@ jobs:
         working-directory: backend
         run: npm run test:e2e
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Backend ESLint
+        working-directory: backend
+        run: npx eslint "{src,test}/**/*.ts"
+
+      - name: Backend Prettier
+        working-directory: backend
+        run: npx prettier --check "src/**/*.ts" "test/**/*.ts"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.9.0'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Frontend ESLint
+        working-directory: frontend
+        run: npx ng lint
+
+      - name: Frontend Prettier
+        working-directory: frontend
+        run: npx prettier --check "src/**/*.ts"
+
   frontend:
     runs-on: ubuntu-latest
     steps:

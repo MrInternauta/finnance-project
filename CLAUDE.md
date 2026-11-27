@@ -28,7 +28,7 @@ The two sub-projects are fully independent. Communication is HTTP REST with JWT 
 - **Auth:** Passport — JWT strategy + Local strategy (email/password)
 - **Password hashing:** bcrypt (10 rounds)
 - **Validation:** class-validator + class-transformer (DTOs), Joi (env vars)
-- **File uploads:** Multer via `@nestjs/platform-express` (jpg/png, max 2MB)
+- **File uploads:** Multer via `@nestjs/platform-express` (JPG/PNG, max 2MB)
 - **API docs:** Swagger at `/docs`
 - **Testing:** Jest + ts-jest
 
@@ -147,7 +147,7 @@ All routes prefixed with `/api`. Auth column: Public / JWT / ADMIN / CUSTOMER.
 | PUT    | `/budgets/:id`            | ADMIN/CUSTOMER | Update own budget amount                  |
 | DELETE | `/budgets/:id`            | ADMIN/CUSTOMER | Soft-delete own budget                    |
 | GET    | `/setDefaultValues`       | API Key        | Seed DB with defaults                     |
-| POST   | `/image/:type/:id`        | ADMIN          | Upload image (jpg/png ≤ 2MB)              |
+| POST   | `/image/:type/:id`        | ADMIN          | Upload image (JPG/PNG ≤ 2MB)              |
 | GET    | `/image/:type/:img`       | ADMIN/CUSTOMER | Retrieve stored image                     |
 | GET    | `/docs`                   | Public         | Swagger UI                                |
 
