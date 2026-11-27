@@ -3,7 +3,7 @@
 Status: Draft v0.1 · Date: 2026-11-27 · Owner: Felipe Ramirez
 
 > Sources: codebase audit of `backend/` and `frontend/` (DeepWiki is not yet indexed for
-> `MrInternauta/finnance-project` — index it at https://deepwiki.com/MrInternauta/finnance-project).
+> `MrInternauta/finnance-project` — index it at <https://deepwiki.com/MrInternauta/finnance-project>).
 > Architecture reference: [`../CLAUDE.md`](../CLAUDE.md). Roadmap: [`PLAN.md`](PLAN.md).
 
 ## 1. Problem & Vision
@@ -21,13 +21,15 @@ Android, and web.
 
 ## 3. Goals / Non-goals
 
-**Goals (v1)**
+### Goals (v1)
+
 - A user can sign up, log in, and manage **only their own** movements.
 - Dashboard shows income vs. expense and balance for a selectable period.
 - Data is private per user; no endpoint leaks another user's data.
 - Account recovery via password reset.
 
-**Non-goals (v1)**
+### Non-goals (v1)
+
 - Bank syncing / open banking, any currency other than MXN, shared household accounts,
   payments, push notifications.
 

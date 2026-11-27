@@ -24,6 +24,7 @@ Date: 2026-11-27 · Requirements: [`PRD.md`](PRD.md) · Architecture: [`../CLAUD
 ## Phase 1 — Make it a real personal-finance app (P0, security/correctness)
 
 Backend (`backend/src/movements`, `backend/src/users`): — Batch A (`5ca27a5`)
+
 - [x] `MovementsController`: dropped `@Is_PublicD()` on `GET /movements` and `GET /movements/:id`;
       all endpoints `Role.CUSTOMER` + `Role.ADMIN`.
 - [x] User injected from JWT via `@CurrentUser()` (`core/auth/decorators`); every
@@ -39,6 +40,7 @@ Backend (`backend/src/movements`, `backend/src/users`): — Batch A (`5ca27a5`)
 - [x] e2e tests: user A cannot read/modify user B's movements; client can CRUD own movements.
 
 Frontend (`frontend/src/app/pages/dashboard`):
+
 - [x] Stopped sending `userId` in movement payloads.
 - [x] Re-enabled `RoleGuardGuard` in `tabs-routing.module.ts` with real role names
       (`ADMIN`, `CLIENT_PRO`, `CLIENT`).

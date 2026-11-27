@@ -6,7 +6,7 @@ Personal finnance tracking mobile app. Users register income/expenses by categor
 
 ## General Structure
 
-```
+```text
 finnance-project/
 ├── backend/    NestJS REST API — auth, business logic, DB
 └── frontend/   Ionic/Angular 18 mobile app — UI, state, Capacitor
@@ -18,7 +18,7 @@ The two sub-projects are fully independent. Communication is HTTP REST with JWT 
 
 ## Backend
 
-### Tech Stack
+### Backend Tech Stack
 
 - **Runtime:** Node.js 18
 - **Framework:** NestJS 10
@@ -32,9 +32,9 @@ The two sub-projects are fully independent. Communication is HTTP REST with JWT 
 - **API docs:** Swagger at `/docs`
 - **Testing:** Jest + ts-jest
 
-### src/ Folder Architecture
+### Backend src/ Folder Architecture
 
-```
+```text
 src/
 ├── main.ts                     Bootstrap — global pipes, ClassSerializerInterceptor
 ├── app.module.ts               Root module
@@ -84,7 +84,7 @@ src/
 
 ### Data Model
 
-```
+```text
 Role ◄────────────── Permission
  │     (ManyToMany via permission_role)
  │
@@ -155,7 +155,7 @@ All routes prefixed with `/api`. Auth column: Public / JWT / ADMIN / CUSTOMER.
 
 ## Frontend
 
-### Tech Stack
+### Frontend Tech Stack
 
 - **Framework:** Angular 18
 - **UI Shell:** Ionic 8
@@ -167,9 +167,9 @@ All routes prefixed with `/api`. Auth column: Public / JWT / ADMIN / CUSTOMER.
 - **Native bridge:** Capacitor 6
 - **Testing:** Karma + Jasmine
 
-### src/ Folder Architecture
+### Frontend src/ Folder Architecture
 
-```
+```text
 src/
 ├── main.ts, polyfills.ts, zone-flags.ts
 ├── environments/
@@ -220,7 +220,7 @@ src/
 
 ### Hybrid Stack (Capacitor)
 
-```
+```text
 Angular 18 → Ionic 8 → Capacitor 6
                             ├── @capacitor/camera     photo capture / gallery
                             ├── @capacitor/status-bar  status bar theming
@@ -233,7 +233,7 @@ App ID: `mx.ramirex.finnance-project` | Name: `finnance-project` | Targets: iOS,
 
 ### App Flow
 
-```
+```text
 App launch → AuthService.loadStorage()
     ├── Session found  → /tabs/tab1  (Dashboard)
     └── No session     → /authentication/login-1
@@ -257,7 +257,7 @@ Logout → clear localStorage → dispatch unUser → /authentication/login-1
 
 ### Communications
 
-```
+```text
 Frontend ──[HTTP + Bearer JWT]──► Backend ──[TypeORM]──► PostgreSQL
 ```
 
@@ -298,7 +298,7 @@ Frontend ──[HTTP + Bearer JWT]──► Backend ──[TypeORM]──► Pos
 
 - **PRD / requirements:** [`doc/PRD.md`](doc/PRD.md)
 - **Roadmap & next steps:** [`doc/PLAN.md`](doc/PLAN.md)
-- **DeepWiki:** https://deepwiki.com/MrInternauta/finnance-project (not indexed yet)
+- **DeepWiki:** <https://deepwiki.com/MrInternauta/finnance-project> (not indexed yet)
 
 Product decisions (PRD §7): roles = super admin (`ADMIN`) + default user (`CLIENT`, auto-assigned
 at sign-up); currency **MXN only**; password reset email via **Resend**; categories = global
@@ -310,7 +310,7 @@ defaults + user-defined.
 
 ### Running Locally (Docker)
 
-```
+```text
 dockerfile              Production image (Node 18)
 dockerfile.dev          Dev image with hot reload
 docker-compose.yml      Production stack
@@ -358,7 +358,7 @@ Creates: 3 roles, 3 users, 15 categories, 5 sample movements.
 
 **Verify:**
 
-- Swagger UI: http://localhost:3000/docs
+- Swagger UI: <http://localhost:3000/docs>
 - Login: `POST http://localhost:3000/api/auth` `{ "email": "admin@admin.com", "password": "1234567890" }`
 
 **Stop:**
@@ -409,7 +409,7 @@ npm run migrations:revert     # rollback last
 
 ### Required Environment Variables (backend `.env`)
 
-```
+```text
 API_KEY
 JWT_SECRET
 JWT_EXPIRES_IN
