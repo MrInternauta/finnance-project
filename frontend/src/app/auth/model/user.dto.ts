@@ -15,7 +15,7 @@ export interface UserDto {
 
   role?: {
     id: number;
-    name: 'ADMIN' | 'CASHIER' | 'CLIENT';
+    name: 'ADMIN' | 'CLIENT_PRO' | 'CLIENT';
     permissions?: Array<any>;
   };
 
@@ -32,7 +32,7 @@ export interface UserUpdateDto {
 
   role?: {
     id: number;
-    name: 'ADMIN' | 'CASHIER' | 'CLIENT';
+    name: 'ADMIN' | 'CLIENT_PRO' | 'CLIENT';
     permissions?: Array<any>;
   };
 }

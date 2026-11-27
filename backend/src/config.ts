@@ -20,6 +20,5 @@ export const configObj = {
   IMAGES_PATH: process.env.IMAGES_PATH,
 };
 export const config = registerAs('config', () => {
-  console.log(configObj);
   return configObj;
 });

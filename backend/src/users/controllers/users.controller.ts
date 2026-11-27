@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -18,11 +19,13 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { Response } from 'express';
 
+import { CurrentUser } from '../../core/auth/decorators/current-user.decorator';
 import { Is_PublicD } from '../../core/auth/decorators/public.decorator';
 import { RoleD } from '../../core/auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../core/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../core/auth/guards/roles.guard';
 import { Role } from '../../core/auth/models/roles.model';
+import { PayloadToken } from '../../core/auth/models/token.model';
 import { FilterDto } from '../../core/interfaces/filter.dto';
 import { UpdateUserDto, UserDto } from '../dtos/user.dto';
 import { UsersService } from '../services/users.service';
@@ -57,12 +60,14 @@ export class UsersController {
     return { users: await this.usersService.findAll(params) };
   }
 
-  @Is_PublicD()
   @Get(':userId')
   @ApiOperation({
     summary: 'Get user by Id',
   })
-  async get(@Res() res: Response, @Param('userId', ParseIntPipe) id: number) {
+  async get(@Res() res: Response, @Param('userId', ParseIntPipe) id: number, @CurrentUser() user: PayloadToken) {
+    if (user.role?.toLowerCase() !== Role.ADMIN && user.sub !== id) {
+      throw new ForbiddenException('You can only read your own user');
+    }
     res.status(HttpStatus.OK).json({
       user: await this.usersService.findOne(id),
     });
@@ -87,8 +92,16 @@ export class UsersController {
   @ApiOperation({
     summary: 'Update an user',
   })
-  async update(@Param('id', ParseIntPipe) id: number, @Body() payload: UpdateUserDto) {
-    const wasUpdated = await this.usersService.update(id, payload as UserDto);
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() payload: UpdateUserDto,
+    @CurrentUser() user: PayloadToken
+  ) {
+    const isAdmin = user.role?.toLowerCase() === Role.ADMIN;
+    if (!isAdmin && user.sub !== id) {
+      throw new ForbiddenException('You can only update your own user');
+    }
+    const wasUpdated = await this.usersService.update(id, payload as UserDto, isAdmin);
     if (!wasUpdated) {
       throw new BadRequestException('User not updated');
     }

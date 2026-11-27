@@ -24,8 +24,6 @@ export interface ArticleCreate {
   quantity: number;
   income?: boolean;
   categoryId?: number;
-  userId?: number;
-
 }
 
 export interface CategoryResponse {

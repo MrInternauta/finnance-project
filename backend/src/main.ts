@@ -20,8 +20,8 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   const config = new DocumentBuilder()
-    .setTitle('My example')
-    .setDescription('The store API description')
+    .setTitle('Finnance API')
+    .setDescription('Personal finance tracking API')
     .setVersion('1.0')
     //.addTag('cats')
     .build();

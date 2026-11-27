@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { RoleGuardGuard } from '../core/guards/role-guard.guard';
 import { TabsPage } from './tabs.page';
 
 const routes: Routes = [
@@ -8,14 +9,14 @@ const routes: Routes = [
     component: TabsPage,
     children: [
       {
-        // canActivate: [RoleGuardGuard],
-        data: { roles: ['ADMIN'] },
+        canActivate: [RoleGuardGuard],
+        data: { roles: ['ADMIN', 'CLIENT_PRO', 'CLIENT'] },
         path: 'tab1',
         loadChildren: () => import('./dashboard/tab1.module').then(m => m.Tab1PageModule),
       },
       {
-        // canActivate: [RoleGuardGuard],
-        data: { roles: ['ADMIN', 'CASHIER', 'CLIENT'] },
+        canActivate: [RoleGuardGuard],
+        data: { roles: ['ADMIN', 'CLIENT_PRO', 'CLIENT'] },
         path: 'tab3',
         loadChildren: () => import('./profile/tab3.module').then(m => m.Tab3PageModule),
       },

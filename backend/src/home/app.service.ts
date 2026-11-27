@@ -49,13 +49,13 @@ export class AppService {
       console.log(admin, cashier, client);
 
       admin.role = role_admin;
-      await this.usersService.update(admin.id, admin);
+      await this.usersService.update(admin.id, admin, true);
 
       cashier.role = role_cashier;
-      await this.usersService.update(cashier.id, cashier);
+      await this.usersService.update(cashier.id, cashier, true);
 
       client.role = role_client;
-      await this.usersService.update(client.id, client);
+      await this.usersService.update(client.id, client, true);
 
       console.log(admin, cashier, client);
 
@@ -66,7 +66,7 @@ export class AppService {
 
       const products = this.productsServices.defaultProducts();
       products.map(async item => {
-        await this.productsServices.create(item);
+        await this.productsServices.create(item, item.userId);
       });
 
       return {

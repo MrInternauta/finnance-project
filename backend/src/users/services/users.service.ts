@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 
 import { FilterDto } from '../../core/interfaces/filter.dto';
 import { UserDto } from '../dtos/user.dto';
+import { Role } from '../entities/role.entity';
 import { User } from '../entities/user.entity';
 import { RolesService } from './roles.service';
 
@@ -45,10 +46,13 @@ export class UsersService {
       role: null,
     });
 
-    if (entity.role) {
-      const role = await this.rolesService.findOne(entity.role);
-      user.role = role;
+    // The role is never taken from the request payload: every user created
+    // through sign-up gets the default CLIENT role (FR-14).
+    const clientRole = await this.rolesService.findOneByName('CLIENT');
+    if (!clientRole) {
+      throw new InternalServerErrorException('Default CLIENT role not found, seed the database first');
     }
+    user.role = clientRole;
 
     if (!user) {
       throw new InternalServerErrorException('User cannot be crated');
@@ -59,51 +63,25 @@ export class UsersService {
     return this.userRepo.save(user);
   }
 
-  async update(id: number, payload: User | UserDto) {
+  async update(id: number, payload: User | UserDto, allowRoleChange = false) {
     const user = await this.findOne(id);
     if (!user) {
       throw new NotFoundException('User Not found ' + id);
     }
 
-    if (payload instanceof UserDto) {
-      const role = await this.rolesService.findOne(payload?.role);
-      this.userRepo.merge(user, {
-        name: payload.name,
-        lastName: payload.lastName,
-        phone: payload.phone,
-        image: payload?.image,
-        role,
-      });
+    let role: Role | undefined;
+    if (allowRoleChange && payload?.role) {
+      const roleId = typeof payload.role === 'number' ? payload.role : payload.role?.id;
+      role = roleId && !isNaN(roleId) ? await this.rolesService.findOne(roleId) : (payload.role as Role);
+    }
 
-      return this.userRepo.save(user);
-    }
-    if (payload?.role?.id && !isNaN(payload?.role?.id)) {
-      const role = await this.rolesService.findOne(payload?.role?.id);
-      this.userRepo.merge(user, {
-        name: payload.name,
-        lastName: payload.lastName,
-        phone: payload.phone,
-        image: payload?.image,
-        role,
-      });
-    } else if (payload?.role) {
-      console.log('payload', payload);
-      this.userRepo.merge(user, {
-        name: payload.name,
-        lastName: payload.lastName,
-        phone: payload.phone,
-        image: payload?.image,
-        role: payload?.role,
-      });
-    } else {
-      console.log('payload', payload);
-      this.userRepo.merge(user, {
-        name: payload.name,
-        lastName: payload.lastName,
-        phone: payload.phone,
-        image: payload?.image,
-      });
-    }
+    this.userRepo.merge(user, {
+      name: payload.name,
+      lastName: payload.lastName,
+      phone: payload.phone,
+      image: payload?.image,
+      ...(role ? { role } : {}),
+    });
 
     return this.userRepo.save(user);
   }

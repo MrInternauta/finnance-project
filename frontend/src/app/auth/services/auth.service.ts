@@ -75,7 +75,7 @@ export class AuthService {
     return this._auth?.id != null && this._auth?.token != null && this._auth?.user != null;
   }
 
-  async currentUserAllowToContinue(roles: Array<'ADMIN' | 'CASHIER' | 'CLIENT'>) {
+  async currentUserAllowToContinue(roles: Array<'ADMIN' | 'CLIENT_PRO' | 'CLIENT'>) {
     if (!roles) {
       return false;
     }
@@ -83,7 +83,6 @@ export class AuthService {
     if (!roles?.length) {
       return false;
     }
-    console.log(roles, this._auth?.user);
 
     return roles.some((role: string) => {
       return role.toLowerCase() == String(this._auth?.user?.role?.name || '').toLowerCase();

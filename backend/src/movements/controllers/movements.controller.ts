@@ -16,12 +16,12 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { Response } from 'express';
 
-import { Is_PublicD } from '../../core/auth/decorators/public.decorator';
+import { CurrentUser } from '../../core/auth/decorators/current-user.decorator';
 import { RoleD } from '../../core/auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../core/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../core/auth/guards/roles.guard';
 import { Role } from '../../core/auth/models/roles.model';
-import { FilterDto } from '../../core/interfaces/filter.dto';
+import { PayloadToken } from '../../core/auth/models/token.model';
 import { ParseIntPipe } from '../../core/pipes/parse-int.pipe';
 import { CreateMovementDto, UpdateMovementDto } from '../dtos/movement.dto';
 import { MovementsFilterDto } from '../dtos/movementFilter.dto';
@@ -35,7 +35,7 @@ export class MovementsController {
 
   //Getting obj query Params: @Query() params: any and params.limit
   @Get()
-  @Is_PublicD()
+  @RoleD(Role.ADMIN, Role.CUSTOMER)
   @ApiOperation({
     summary: 'movements list',
     description: 'Get all movements',
@@ -55,47 +55,52 @@ export class MovementsController {
     ],
   })
   @HttpCode(HttpStatus.OK)
-  async getmovements(
-    @Query() params: MovementsFilterDto
-    // @Query('offset') offset = 10,
-  ) {
-    return { movements: await this.movementsService.findAll(params) };
+  async getmovements(@Query() params: MovementsFilterDto, @CurrentUser() user: PayloadToken) {
+    return { movements: await this.movementsService.findAll(params, user.sub) };
   }
 
   //Getting obj params: Can use  Param() params: any and params.movementId
   @Get(':movementId')
-  @Is_PublicD()
+  @RoleD(Role.ADMIN, Role.CUSTOMER)
   @ApiOperation({
     summary: 'Get movement by Id',
   })
   @HttpCode(HttpStatus.OK)
-  async getMovement(@Res() res: Response, @Param('movementId', ParseIntPipe) movementId: number) {
+  async getMovement(
+    @Res() res: Response,
+    @Param('movementId', ParseIntPipe) movementId: number,
+    @CurrentUser() user: PayloadToken
+  ) {
     res.json({
-      movement: await this.movementsService.findOne(movementId),
+      movement: await this.movementsService.findOne(movementId, user.sub),
     });
   }
-  
+
   @Post()
   @HttpCode(HttpStatus.OK)
-  @RoleD(Role.ADMIN)
+  @RoleD(Role.ADMIN, Role.CUSTOMER)
   @ApiOperation({
     summary: 'Create a movement',
   })
-  async create(@Body() movement: CreateMovementDto) {
+  async create(@Body() movement: CreateMovementDto, @CurrentUser() user: PayloadToken) {
     return {
       message: 'Movement created',
-      movement: await this.movementsService.create(movement),
+      movement: await this.movementsService.create(movement, user.sub),
     };
   }
 
   @Put(':movementId')
   @HttpCode(HttpStatus.OK)
-  @RoleD(Role.ADMIN)
+  @RoleD(Role.ADMIN, Role.CUSTOMER)
   @ApiOperation({
     summary: 'Update a movement',
   })
-  async update(@Param('movementId', ParseIntPipe) movementId: number, @Body() movement: UpdateMovementDto) {
-    const wasUpdated = await this.movementsService.update(movementId, movement);
+  async update(
+    @Param('movementId', ParseIntPipe) movementId: number,
+    @Body() movement: UpdateMovementDto,
+    @CurrentUser() user: PayloadToken
+  ) {
+    const wasUpdated = await this.movementsService.update(movementId, movement, user.sub);
     if (wasUpdated) {
       return {
         message: `Movement updated: ${movementId}`,
@@ -108,13 +113,17 @@ export class MovementsController {
     }
   }
 
-  @RoleD(Role.ADMIN)
+  @RoleD(Role.ADMIN, Role.CUSTOMER)
   @Put(':idMovement/restore')
   @ApiOperation({
     summary: 'restore an movement',
   })
-  async restore(@Res() res: Response, @Param('idMovement', ParseIntPipe) idMovement: number) {
-    const wasUpdated = await this.movementsService.restore(idMovement);
+  async restore(
+    @Res() res: Response,
+    @Param('idMovement', ParseIntPipe) idMovement: number,
+    @CurrentUser() user: PayloadToken
+  ) {
+    const wasUpdated = await this.movementsService.restore(idMovement, user.sub);
     if (wasUpdated?.affected > 0) {
       res.status(HttpStatus.OK).json({ message: 'Movement restored', movement: wasUpdated });
     } else {
@@ -124,13 +133,13 @@ export class MovementsController {
 
   //Use ParseIntPipe to parse the param to int (in the traspilation to JS)
   @Delete(':movementId')
-  @RoleD(Role.ADMIN)
+  @RoleD(Role.ADMIN, Role.CUSTOMER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Delete a movement',
   })
-  async delete(@Param('movementId', ParseIntPipe) movementId: number) {
-    await this.movementsService.remove(movementId);
+  async delete(@Param('movementId', ParseIntPipe) movementId: number, @CurrentUser() user: PayloadToken) {
+    await this.movementsService.remove(movementId, user.sub);
     return {
       message: `Movement ${movementId} deleted`,
     };
