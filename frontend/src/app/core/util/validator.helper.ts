@@ -8,5 +8,4 @@ export const isEmail = (email: string): boolean => {
   return re.test(String(email).toLowerCase());
 };
 
-export const ValidLength = (string: string, length: number): boolean =>
-  String(string).length <= length;
+export const ValidLength = (string: string, length: number): boolean => String(string).length <= length;

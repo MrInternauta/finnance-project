@@ -1,7 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-
 import { MovementsModule } from '../movements/movements.module';
 import { ProfileController } from './controllers/profile.controller';
 import { RolesController } from './controllers/rols.controller';

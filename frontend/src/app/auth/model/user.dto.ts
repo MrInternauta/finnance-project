@@ -1,5 +1,3 @@
-
-
 export interface UserDto {
   id?: number;
 
@@ -21,7 +19,6 @@ export interface UserDto {
 
   image?: string;
 }
-
 
 export interface UserUpdateDto {
   name?: string;

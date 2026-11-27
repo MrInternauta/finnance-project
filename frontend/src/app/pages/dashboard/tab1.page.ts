@@ -16,7 +16,18 @@ import { selectMovements, selectSummary } from './state/workout.selector';
 type PeriodKey = 'month' | 'lastMonth' | '3months' | 'year';
 type IncomeFilter = 'all' | 'income' | 'expense';
 
-const DOUGHNUT_COLORS = ['#dc2626', '#e11d48', '#f97316', '#f59e0b', '#84cc16', '#16a34a', '#0ea5e9', '#6366f1', '#a855f7', '#64748b'];
+const DOUGHNUT_COLORS = [
+  '#dc2626',
+  '#e11d48',
+  '#f97316',
+  '#f59e0b',
+  '#84cc16',
+  '#16a34a',
+  '#0ea5e9',
+  '#6366f1',
+  '#a855f7',
+  '#64748b',
+];
 
 @Component({
   selector: 'app-tab1',
@@ -102,7 +113,7 @@ export class Tab1Page implements OnInit, OnDestroy {
       legend: { position: 'bottom' },
     },
   };
-  public doughnutChartType: 'doughnut' = 'doughnut';
+  public doughnutChartType = 'doughnut' as const;
 
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
@@ -144,13 +155,19 @@ export class Tab1Page implements OnInit, OnDestroy {
   }
 
   get totalIncome(): number {
-    return this.summary?.income ?? (this.historyWorkout.reduce((acc, item) => (item.income ? acc + item.quantity : acc), 0) || 0);
+    return (
+      this.summary?.income ??
+      (this.historyWorkout.reduce((acc, item) => (item.income ? acc + item.quantity : acc), 0) || 0)
+    );
   }
   get totalOutcome(): number {
-    return this.summary?.expense ?? (this.historyWorkout.reduce((acc, item) => (!item.income ? acc + item.quantity : acc), 0) || 0);
+    return (
+      this.summary?.expense ??
+      (this.historyWorkout.reduce((acc, item) => (!item.income ? acc + item.quantity : acc), 0) || 0)
+    );
   }
   get balance(): number {
-    return this.summary?.balance ?? (this.totalIncome - this.totalOutcome);
+    return this.summary?.balance ?? this.totalIncome - this.totalOutcome;
   }
   get hasExpenseByCategory(): boolean {
     return (this.summary?.byCategory || []).some(item => item.expense > 0);

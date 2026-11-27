@@ -6,7 +6,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api', { exclude: []});
+  app.setGlobalPrefix('api', { exclude: [] });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, //Remove not declared fields
@@ -15,7 +15,7 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: true,
       },
-    }),
+    })
   ); //Activate pipe validator
 
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));

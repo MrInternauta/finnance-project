@@ -1,9 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { EMPTY, forkJoin } from 'rxjs';
-import { map, mergeMap, catchError, take } from 'rxjs/operators';
+import { catchError, map, mergeMap } from 'rxjs/operators';
 import { WorkoutService } from '../services/workout.service';
-import { loadDashboard, loadDashboardType, loadExerciseType, loadedDashboardType, loadedExerciseType } from './workout.actions';
+import {
+  loadDashboard,
+  loadDashboardType,
+  loadExerciseType,
+  loadedDashboardType,
+  loadedExerciseType,
+} from './workout.actions';
 
 @Injectable()
 export class ExercisesEffects {
@@ -12,7 +18,7 @@ export class ExercisesEffects {
       ofType(loadExerciseType),
       mergeMap(() =>
         this.exercisesService.getProducts().pipe(
-          map((response) => ({
+          map(response => ({
             type: loadedExerciseType,
             Exercise: response,
           })),

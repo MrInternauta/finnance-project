@@ -1,12 +1,5 @@
 /* eslint-disable @angular-eslint/no-empty-lifecycle-method */
-import {
-  Component,
-  Input,
-  OnInit,
-  Output,
-  EventEmitter,
-  OnDestroy,
-} from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { ModalService } from './modal.service';
 
 @Component({

@@ -13,7 +13,7 @@ export interface ArticleItemResponse {
   quantity: number;
   income?: boolean;
   category?: CategoryItemResponse;
-  user?: User
+  user?: User;
 }
 
 export interface ArticleCreate {

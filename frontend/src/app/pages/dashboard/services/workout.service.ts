@@ -23,7 +23,6 @@ const API_URL_BUDGETS = `${environment.url}${API_PREFIX}budgets`;
   providedIn: 'root',
 })
 export class WorkoutService {
-  
   public product?: ArticleItemResponse | null = null;
   constructor(public http: HttpClient) {}
 

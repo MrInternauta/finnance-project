@@ -27,7 +27,7 @@ export class Tab2Page implements OnInit, OnDestroy {
       legend: { position: 'bottom' },
     },
   };
-  public barChartType: 'bar' = 'bar';
+  public barChartType = 'bar' as const;
 
   constructor(
     private workoutService: WorkoutService,
@@ -53,12 +53,18 @@ export class Tab2Page implements OnInit, OnDestroy {
     const endOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
     switch (this.period) {
       case '12months':
-        return { from: new Date(now.getFullYear(), now.getMonth() - 11, 1).toISOString(), to: endOfDay(now).toISOString() };
+        return {
+          from: new Date(now.getFullYear(), now.getMonth() - 11, 1).toISOString(),
+          to: endOfDay(now).toISOString(),
+        };
       case 'year':
         return { from: new Date(now.getFullYear(), 0, 1).toISOString(), to: endOfDay(now).toISOString() };
       case '6months':
       default:
-        return { from: new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString(), to: endOfDay(now).toISOString() };
+        return {
+          from: new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString(),
+          to: endOfDay(now).toISOString(),
+        };
     }
   }
 

@@ -1,7 +1,6 @@
 import { Action, createReducer, on } from '@ngrx/store';
+import { ArticleResponse, MovementSummary } from '../models';
 import { loadedDashboard, loadedExercise } from './workout.actions';
-import { IExercise } from '@gymTrack/core';
-import { ArticleItemResponse, ArticleResponse, MovementSummary } from '../models';
 
 export const ExerciseFeatureKey = 'Exercise';
 export const SummaryFeatureKey = 'Summary';

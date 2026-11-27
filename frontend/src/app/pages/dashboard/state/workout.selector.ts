@@ -1,11 +1,7 @@
-import {
-  createSelector,
-  DefaultProjectorFn,
-  MemoizedSelector,
-} from '@ngrx/store';
-import { AppState, IExercise } from '@gymTrack/core';
-import { ExerciseFeatureKey, ExerciseState, SummaryFeatureKey } from './workout.state';
+import { AppState } from '@gymTrack/core';
+import { createSelector, DefaultProjectorFn, MemoizedSelector } from '@ngrx/store';
 import { ArticleResponse, MovementSummary } from '../models';
+import { ExerciseFeatureKey, ExerciseState, SummaryFeatureKey } from './workout.state';
 
 export interface FeatureState {
   counter: number;
@@ -17,10 +13,7 @@ export const selectListExercise: MemoizedSelector<
   AppState,
   ArticleResponse | null,
   DefaultProjectorFn<any | null>
-> = createSelector(
-  selectExerciseFeature,
-  (state: ExerciseState) => state[ExerciseFeatureKey]
-);
+> = createSelector(selectExerciseFeature, (state: ExerciseState) => state[ExerciseFeatureKey]);
 
 export const selectMovements = createSelector(
   selectExerciseFeature,
@@ -31,7 +24,4 @@ export const selectSummary: MemoizedSelector<
   AppState,
   MovementSummary | null,
   DefaultProjectorFn<MovementSummary | null>
-> = createSelector(
-  selectExerciseFeature,
-  (state: ExerciseState) => state[SummaryFeatureKey]
-);
+> = createSelector(selectExerciseFeature, (state: ExerciseState) => state[SummaryFeatureKey]);

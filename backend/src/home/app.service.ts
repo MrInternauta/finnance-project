@@ -24,7 +24,7 @@ export class AppService {
   async setDefaultValues() {
     try {
       const roles = this.rolesService.defaultValuesRole();
-      
+
       const role_admin = await this.rolesService.create({
         name: roles.role_admin.name,
         permissions: roles.role_admin.permissions,
@@ -72,7 +72,6 @@ export class AppService {
       return {
         message: 'Values set successfully!',
       };
-      
     } catch (error) {
       console.log(error);
       throw new BadRequestException('Values already set');

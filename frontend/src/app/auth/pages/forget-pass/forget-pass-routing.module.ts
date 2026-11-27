@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { ForgetPassComponent } from './forget-pass.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: ForgetPassComponent
+    component: ForgetPassComponent,
   },
 ];
 

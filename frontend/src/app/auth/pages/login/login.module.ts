@@ -7,26 +7,8 @@ import { ComponentsModule } from '../../../core/components/components.module';
 import { LoginPageRoutingModule } from './login-routing.module';
 import { LoginPage } from './login.page';
 
-const antdModule = [
-  // NzFormModule,
-  // NzInputModule,
-  // NzButtonModule,
-  // NzCardModule,
-  // NzIconModule,
-  // NzCheckboxModule,
-  // AngularSvgIconModule.forRoot(),
-];
-
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    ReactiveFormsModule,
-    LoginPageRoutingModule,
-    ComponentsModule,
-    // ...antdModule,
-  ],
+  imports: [CommonModule, FormsModule, IonicModule, ReactiveFormsModule, LoginPageRoutingModule, ComponentsModule],
   declarations: [LoginPage],
   providers: [
     // ModalInfoService

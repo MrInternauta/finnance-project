@@ -6,7 +6,7 @@ export function getQueryParam(router: Router, key: string): string {
   do {
     const childrenRoutes = currentRoute.children;
     currentRoute = null;
-    childrenRoutes.forEach((routes) => {
+    childrenRoutes.forEach(routes => {
       if (routes?.outlet === 'primary') {
         if (routes?.snapshot?.queryParams[key]) {
           titleText = routes.snapshot?.queryParams[key];
@@ -25,7 +25,7 @@ export function getData(router: Router, key: string): string {
   do {
     const childrenRoutes = currentRoute.children;
     currentRoute = null;
-    childrenRoutes.forEach((routes) => {
+    childrenRoutes.forEach(routes => {
       if (routes?.outlet === 'primary') {
         if (routes?.snapshot?.data[key]) {
           value = routes.snapshot?.data[key];

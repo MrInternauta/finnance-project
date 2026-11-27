@@ -1,13 +1,13 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AlertController, ModalController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 
+import { Router } from '@angular/router';
 import { ISelectItem } from '../../../core/models/iselect.item';
 import { ModalInfoService } from '../../../core/services/modal.service';
 import { PictureService } from '../../../core/services/picture.service';
 import { ArticleCreate, ArticleItemResponse } from '../models';
 import { WorkoutService } from '../services/workout.service';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-detail',
@@ -31,7 +31,7 @@ export class DetailComponent implements OnDestroy, OnInit {
     private modalCtrl: ModalController,
     private pictureService: PictureService,
     private alertController: AlertController,
-    public router: Router,
+    public router: Router
   ) {
     this.getCategories();
   }
@@ -57,7 +57,6 @@ export class DetailComponent implements OnDestroy, OnInit {
   ngOnInit(): void {
     console.log(this.productService.product);
     if (this.productService.product) {
-      
       this.name = this.productService.product?.name;
       this.date = this.productService.product?.date?.toString();
       this.description = this.productService.product?.description;
@@ -85,7 +84,8 @@ export class DetailComponent implements OnDestroy, OnInit {
             name: item.name,
             value: item.id.toString(),
             selected:
-              item.id?.toString()?.toLocaleLowerCase() === (this.categoryId || this.productService.product?.category?.id?.toString())?.toLocaleLowerCase(),
+              item.id?.toString()?.toLocaleLowerCase() ===
+              (this.categoryId || this.productService.product?.category?.id?.toString())?.toLocaleLowerCase(),
           };
         }) || [];
     });
@@ -130,16 +130,15 @@ export class DetailComponent implements OnDestroy, OnInit {
   // }
 
   confirm() {
-
     console.log(this.name, this.date, this.quantity, this.outcome, this.description, this.categoryId);
-    
+
     this.fillEmptyForm();
     //method that use productService to post or put a product
     //build the object to send to the service
     // and validate fields before sending or keep those as null
     const product: ArticleCreate = {
       name: this.name,
-      date: this.date ? new Date(this.date): new Date(),
+      date: this.date ? new Date(this.date) : new Date(),
       quantity: parseInt(this.quantity || '0'),
       income: !this.outcome,
       description: this.description,
@@ -148,27 +147,28 @@ export class DetailComponent implements OnDestroy, OnInit {
 
     console.log(product);
     //determine if it is a post or put by the existence of the product id
-    this.subscription$ = (this.productService.product?.id ? this.productService.putProduct(String(this.productService.product?.id), product) : this.productService.postProduct(product))
-    
-    //handle put or post response
-    .subscribe(
-      (response: ArticleItemResponse) => {
-        console.log(response);
-        this.modalInfoService.success('Success!', 'Movement saved successfully');
-        this.removeSubscription();
-        this.modalCtrl.dismiss(response, 'confirm');
-        //move to dashboard page and refresh the list
-        this.router.navigate(['tabs', 'tab1', 'detail'], );
-        this.removeSubscription();
-        
+    this.subscription$ = (
+      this.productService.product?.id
+        ? this.productService.putProduct(String(this.productService.product?.id), product)
+        : this.productService.postProduct(product)
+    )
 
-
-      },
-      error => {
-        console.log(error);
-        // this.modalInfoService.error('Error saving product');
-      });
-
+      //handle put or post response
+      .subscribe(
+        (response: ArticleItemResponse) => {
+          console.log(response);
+          this.modalInfoService.success('Success!', 'Movement saved successfully');
+          this.removeSubscription();
+          this.modalCtrl.dismiss(response, 'confirm');
+          //move to dashboard page and refresh the list
+          this.router.navigate(['tabs', 'tab1', 'detail']);
+          this.removeSubscription();
+        },
+        error => {
+          console.log(error);
+          // this.modalInfoService.error('Error saving product');
+        }
+      );
   }
 
   public changeName(event: string) {
@@ -198,7 +198,7 @@ export class DetailComponent implements OnDestroy, OnInit {
 
   public changeSelect(event: any) {
     console.log(event);
-    
+
     this.categoryId = event;
     this.didSomeChange = true;
   }

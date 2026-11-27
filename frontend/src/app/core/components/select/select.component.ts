@@ -28,11 +28,15 @@ export class SelectComponent implements OnInit {
 
   ngOnInit() {
     this.dataSource = this.dataSource || [];
-    this.dataSource = this.dataSource.map((item) => { return { ...item, selected: item.value === this.defaultValue } });
+    this.dataSource = this.dataSource.map(item => {
+      return { ...item, selected: item.value === this.defaultValue };
+    });
   }
 
   handleChange(event: any) {
-    this.dataSource = this.dataSource.map((item) => { return { ...item, selected: item.value === this.defaultValue } });
+    this.dataSource = this.dataSource.map(item => {
+      return { ...item, selected: item.value === this.defaultValue };
+    });
     this.inputValueChange.emit(event.detail.value);
   }
 
@@ -48,5 +52,4 @@ export class SelectComponent implements OnInit {
     //avoid mark as selected all the items
     return e1.name === e2.name;
   }
-
 }

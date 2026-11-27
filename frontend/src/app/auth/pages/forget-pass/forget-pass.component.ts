@@ -5,9 +5,8 @@ import { ModalInfoService } from '../../../core/services/modal.service';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-    templateUrl: './forget-pass.component.html'
+  templateUrl: './forget-pass.component.html',
 })
-
 export class ForgetPassComponent implements OnInit {
   myForm!: FormGroup;
 
@@ -19,7 +18,7 @@ export class ForgetPassComponent implements OnInit {
 
   ngOnInit() {
     this.myForm = this.formBuilder.group({
-      userName: ['', [Validators.required, Validators.email]]
+      userName: ['', [Validators.required, Validators.email]],
     });
   }
 

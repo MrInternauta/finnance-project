@@ -42,17 +42,15 @@ export class RolesService {
         throw new InternalServerErrorException('Role cannot be crated');
       }
 
-
       const newRole = await this.roleRepo.save(role);
 
       const newPermission = await this.createPermissions(permissions);
 
       this.roleRepo.merge(newRole, {
-        permissions: newPermission
+        permissions: newPermission,
       });
-      
-      return this.roleRepo.save(newRole);
 
+      return this.roleRepo.save(newRole);
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('Error creating role');
@@ -96,7 +94,7 @@ export class RolesService {
         description: permissions[index]?.description || '',
       });
       newPermissions.push(newPermission);
-    }    
+    }
     return newPermissions;
   }
 
@@ -128,11 +126,10 @@ export class RolesService {
     if (currentPermission?.id) {
       return currentPermission;
     }
-    const newPermission  = this.permissionRepo.create({
-      ...permission
+    const newPermission = this.permissionRepo.create({
+      ...permission,
     });
     return this.permissionRepo.save(newPermission);
-
   }
 
   async updatePermission(permission: PermissionDto) {
