@@ -1,7 +1,7 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
-
-import { ExploreContainerComponentModule } from '../../explore-container/explore-container.module';
+import { NzModalService } from 'ng-zorro-antd/modal';
 
 import { Tab2Page } from './tab2.page';
 
@@ -12,7 +12,8 @@ describe('Tab2Page', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [Tab2Page],
-      imports: [IonicModule.forRoot(), ExploreContainerComponentModule],
+      imports: [IonicModule.forRoot(), HttpClientTestingModule],
+      providers: [{ provide: NzModalService, useValue: {} }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Tab2Page);

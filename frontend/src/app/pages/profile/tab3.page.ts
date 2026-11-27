@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UserUpdateDto } from '@gymTrack/auth/model/user.dto';
 import { AlertController, ToastController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
@@ -6,6 +6,8 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../../auth/services/auth.service';
 import { ModalInfoService } from '../../core/services/modal.service';
 import { PictureService } from '../../core/services/picture.service';
+import { CategoryItemResponse } from '../dashboard/models';
+import { WorkoutService } from '../dashboard/services/workout.service';
 import { ProfileService } from './services/profile.service';
 
 @Component({
@@ -13,9 +15,11 @@ import { ProfileService } from './services/profile.service';
   templateUrl: 'tab3.page.html',
   styleUrls: ['tab3.page.scss'],
 })
-export class Tab3Page implements OnDestroy {
+export class Tab3Page implements OnInit, OnDestroy {
   public editMode = false;
   $susctiption!: Subscription;
+  public myCategories: CategoryItemResponse[] = [];
+  private categoriesSub?: Subscription;
   private userToUpdate!: UserUpdateDto;
   constructor(
     private alertController: AlertController,
@@ -23,9 +27,42 @@ export class Tab3Page implements OnDestroy {
     private userService: ProfileService,
     private toastController: ToastController,
     private modalInfoService: ModalInfoService,
-    private pictureService: PictureService
+    private pictureService: PictureService,
+    private workoutService: WorkoutService
   ) {
     this.userToUpdate = {};
+  }
+
+  ngOnInit(): void {
+    this.loadMyCategories();
+  }
+
+  loadMyCategories() {
+    this.categoriesSub?.unsubscribe();
+    this.categoriesSub = this.workoutService.getCategories().subscribe(res => {
+      // `isDefault` marks global categories; "Mis categorías" shows only the user's own.
+      this.myCategories = (res?.categories || []).filter(c => !c.isDefault);
+    });
+  }
+
+  async deleteCategory(category: CategoryItemResponse) {
+    const alert = await this.alertController.create({
+      header: 'Eliminar categoría',
+      message: `¿Eliminar "${category.name}"?`,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Eliminar',
+          handler: () => {
+            this.workoutService.deleteCategory(category.id).subscribe({
+              next: () => this.loadMyCategories(),
+              error: () => this.modalInfoService.error('No se pudo eliminar la categoría', ''),
+            });
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 
   async sendResetPassword() {
@@ -110,5 +147,6 @@ export class Tab3Page implements OnDestroy {
 
   ngOnDestroy(): void {
     this.$susctiption?.unsubscribe();
+    this.categoriesSub?.unsubscribe();
   }
 }

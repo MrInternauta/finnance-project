@@ -1,17 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 
 import { AuthService } from '../../services';
 
-import { AppState } from '../../../core/state/app.reducer';
 import { UserDto } from '@gymTrack/auth/model/user.dto';
 import { ModalInfoService } from '../../../core/services/modal.service';
+import { AppState } from '../../../core/state/app.reducer';
 
 @Component({
   templateUrl: './sign-up-1.component.html',
@@ -54,15 +49,17 @@ export class SignUp1Component implements OnInit {
       phone: this.signUpForm.value.phone,
       email: this.signUpForm.value.email,
       password: this.signUpForm.value.password,
-
-    }
-    this.authService.signUp(signup).subscribe((value)=>{
-      this.modalInfoService.success('User created', '');
-      this.signUpForm.hasError('Something is wrong');
-    }, error => {
-      this.modalInfoService.error('Something is wrong', error || '');
-      this.signUpForm.hasError('Something is wrong');
-    });
+    };
+    this.authService.signUp(signup).subscribe(
+      () => {
+        this.modalInfoService.success('User created', '');
+        this.signUpForm.hasError('Something is wrong');
+      },
+      error => {
+        this.modalInfoService.error('Something is wrong', error || '');
+        this.signUpForm.hasError('Something is wrong');
+      }
+    );
   }
 
   // updateConfirmValidator(): void {

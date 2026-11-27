@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
-import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, IsUrl } from 'class-validator';
+import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 
 export class CreateMovementDto {
   @IsOptional()
@@ -24,7 +24,6 @@ export class CreateMovementDto {
   @ApiProperty({ description: 'Quantity for the movement' })
   readonly quantity: number;
 
-
   @IsOptional()
   @IsBoolean()
   @ApiProperty({ description: 'Is an income or outcome' })
@@ -39,11 +38,6 @@ export class CreateMovementDto {
   @ApiProperty()
   @IsNumber()
   readonly categoryId?: number;
-
-  @IsNotEmpty()
-  @ApiProperty()
-  @IsNumber()
-  readonly userId?: number;
 }
 
 export class UpdateMovementDto extends PartialType(CreateMovementDto) {}

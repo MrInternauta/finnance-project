@@ -1,12 +1,12 @@
-# Finnance — Mini POS
+# Finnance — finnance-project
 
-Personal finance tracking and Point of Sale mobile app. Users register income/expenses by category, manage their profile, and are controlled via role-based access. Runs on iOS, Android, and web.
+Personal finnance tracking mobile app. Users register income/expenses by category, manage their profile, and are controlled via role-based access. Runs on iOS, Android, and web.
 
 ---
 
 ## General Structure
 
-```
+```text
 finnance-project/
 ├── backend/    NestJS REST API — auth, business logic, DB
 └── frontend/   Ionic/Angular 18 mobile app — UI, state, Capacitor
@@ -18,7 +18,7 @@ The two sub-projects are fully independent. Communication is HTTP REST with JWT 
 
 ## Backend
 
-### Tech Stack
+### Backend Tech Stack
 
 - **Runtime:** Node.js 18
 - **Framework:** NestJS 10
@@ -28,13 +28,13 @@ The two sub-projects are fully independent. Communication is HTTP REST with JWT 
 - **Auth:** Passport — JWT strategy + Local strategy (email/password)
 - **Password hashing:** bcrypt (10 rounds)
 - **Validation:** class-validator + class-transformer (DTOs), Joi (env vars)
-- **File uploads:** Multer via `@nestjs/platform-express` (jpg/png, max 2MB)
+- **File uploads:** Multer via `@nestjs/platform-express` (JPG/PNG, max 2MB)
 - **API docs:** Swagger at `/docs`
 - **Testing:** Jest + ts-jest
 
-### src/ Folder Architecture
+### Backend src/ Folder Architecture
 
-```
+```text
 src/
 ├── main.ts                     Bootstrap — global pipes, ClassSerializerInterceptor
 ├── app.module.ts               Root module
@@ -57,6 +57,9 @@ src/
 │   │   ├── data-source.ts      CLI DataSource for migration commands
 │   │   └── migrations/         1735627479683 — initial schema
 │   │                           1747982567572 — user.image nullable
+│   │                           1795814625128 — drop movement unique index
+│   │                           1795815327280 — category.id_user, password_reset_token
+│   │                           1795816652908 — budget table
 │   ├── interfaces/
 │   │   ├── basic.entity.ts     Base class: createdAt, updatedAt, deletedAt (soft-delete)
 │   │   ├── filter.dto.ts       Shared pagination DTO (page, limit)
@@ -70,27 +73,34 @@ src/
 │   └── controllers/            users.controller.ts, rols.controller.ts, profile.controller.ts
 │
 └── movements/
-    ├── entities/               movement.entity.ts (named "Product" in code), category.entity.ts
-    ├── dtos/                   movement.dto.ts, category.dto.ts, movementFilter.dto.ts
-    ├── services/               movements.service.ts, categories.service.ts
-    └── controllers/            movements.controller.ts, categories.controller.ts
+    ├── entities/               movement.entity.ts (named "Product" in code), category.entity.ts,
+    │                           budget.entity.ts
+    ├── dtos/                   movement.dto.ts, category.dto.ts, movementFilter.dto.ts,
+    │                           budget.dto.ts
+    ├── services/               movements.service.ts, categories.service.ts, budgets.service.ts
+    └── controllers/            movements.controller.ts, categories.controller.ts,
+                                budgets.controller.ts
 ```
 
 ### Data Model
 
-```
+```text
 Role ◄────────────── Permission
  │     (ManyToMany via permission_role)
  │
 User ──► Role
  │
  └──► Movement  (entity file: movement.entity.ts, named "Product" in code)
-         ├── name, date, quantity (real), description
-         ├── income: boolean  (true = income / false = expense)
-         └──► Category
-                └── SUELDO | INVERSIONES | ALOJAMIENTO | ENTRETENIMIENTO
-                    TRANSPORTE | GTS_PERSONALES | SEGUROS | CREDITO | COMIDA
-                    AHORRO | APRENDIZAJE | REGALOS | CUIDADO_PERSONAL | METAS | OTROS
+ │        ├── name, date, quantity (real), description
+ │        ├── income: boolean  (true = income / false = expense)
+ │        └──► Category  (nullable user FK: null = global default, set = user-owned)
+ │               └── SUELDO | INVERSIONES | ALOJAMIENTO | ENTRETENIMIENTO
+ │                   TRANSPORTE | GTS_PERSONALES | SEGUROS | CREDITO | COMIDA
+ │                   AHORRO | APRENDIZAJE | REGALOS | CUIDADO_PERSONAL | METAS | OTROS
+ │
+ ├──► Category  (user-defined categories, FR-18)
+ ├──► Budget    (one active per user+category)
+ └──► PasswordResetToken  (sha256 hash, 30-min expiry, single-use)
 ```
 
 - All entities extend `BasicEntity` → soft-delete via `deletedAt`, never hard-deleted
@@ -102,41 +112,50 @@ User ──► Role
 
 All routes prefixed with `/api`. Auth column: Public / JWT / ADMIN / CUSTOMER.
 
-| Method | Route | Auth | Description |
-|---|---|---|---|
-| POST | `/auth` | Public | Login → `{ access_token, user }` |
-| GET | `/users` | ADMIN | List users (paginated) |
-| GET | `/users/:id` | Public | Get user by ID |
-| POST | `/users` | Public | Create user (sign up) |
-| PUT | `/users/:id` | ADMIN/CUSTOMER | Update user |
-| DELETE | `/users/:id` | ADMIN | Soft-delete user |
-| GET | `/profile/my-orders` | CUSTOMER | Authenticated user's movements |
-| GET | `/roles` | ADMIN | List roles |
-| POST | `/roles` | ADMIN | Create role |
-| PUT | `/roles/:id` | ADMIN | Update role |
-| DELETE | `/roles/:id` | ADMIN | Soft-delete role |
-| GET | `/movements` | Public | List movements (filter: name, categoryId) |
-| GET | `/movements/:id` | Public | Get movement by ID |
-| POST | `/movements` | ADMIN | Create movement |
-| PUT | `/movements/:id` | ADMIN | Update movement |
-| PUT | `/movements/:id/restore` | ADMIN | Restore soft-deleted movement |
-| DELETE | `/movements/:id` | ADMIN | Soft-delete movement |
-| GET | `/categories` | Public | List categories |
-| GET | `/categories/:id` | Public | Get category by ID |
-| POST | `/categories` | ADMIN | Create category |
-| PUT | `/categories/:id` | ADMIN | Update category |
-| PUT | `/categories/:id/restore` | ADMIN | Restore soft-deleted category |
-| DELETE | `/categories/:id` | ADMIN | Soft-delete category |
-| GET | `/setDefaultValues` | API Key | Seed DB with defaults |
-| POST | `/image/:type/:id` | ADMIN | Upload image (jpg/png ≤ 2MB) |
-| GET | `/image/:type/:img` | ADMIN/CUSTOMER | Retrieve stored image |
-| GET | `/docs` | Public | Swagger UI |
+| Method | Route                     | Auth           | Description                               |
+| ------ | ------------------------- | -------------- | ----------------------------------------- |
+| POST   | `/auth`                   | Public, 5/min  | Login → `{ access_token, user }`          |
+| POST   | `/auth/forgot`            | Public, 5/min  | Request password reset email              |
+| POST   | `/auth/reset`             | Public, 5/min  | Reset password with token                 |
+| GET    | `/users`                  | ADMIN          | List users (paginated)                    |
+| GET    | `/users/:id`              | ADMIN or self  | Get user by ID                            |
+| POST   | `/users`                  | Public         | Create user (sign up; role always CLIENT) |
+| PUT    | `/users/:id`              | ADMIN/CUSTOMER | Update user (self unless ADMIN; role only by ADMIN) |
+| DELETE | `/users/:id`              | ADMIN          | Soft-delete user                          |
+| GET    | `/profile/my-orders`      | CUSTOMER       | Authenticated user's movements            |
+| GET    | `/roles`                  | ADMIN          | List roles                                |
+| POST   | `/roles`                  | ADMIN          | Create role                               |
+| PUT    | `/roles/:id`              | ADMIN          | Update role                               |
+| DELETE | `/roles/:id`              | ADMIN          | Soft-delete role                          |
+| GET    | `/movements`              | ADMIN/CUSTOMER | Own movements (filter: name, categoryId, from, to, income) |
+| GET    | `/movements/summary`      | ADMIN/CUSTOMER | Totals + per-category for `from`/`to`     |
+| GET    | `/movements/summary/monthly` | ADMIN/CUSTOMER | Totals grouped by month                |
+| GET    | `/movements/export`       | ADMIN/CUSTOMER | CSV download of own movements             |
+| GET    | `/movements/:id`          | ADMIN/CUSTOMER | Get own movement by ID                    |
+| POST   | `/movements`              | ADMIN/CUSTOMER | Create movement                           |
+| PUT    | `/movements/:id`          | ADMIN/CUSTOMER | Update own movement                       |
+| PUT    | `/movements/:id/restore`  | ADMIN/CUSTOMER | Restore own soft-deleted movement         |
+| DELETE | `/movements/:id`          | ADMIN/CUSTOMER | Soft-delete own movement                  |
+| GET    | `/categories`             | ADMIN/CUSTOMER | Defaults + own categories (unpaginated)   |
+| GET    | `/categories/:id`         | ADMIN/CUSTOMER | Get default/own category by ID            |
+| POST   | `/categories`             | ADMIN/CUSTOMER | Create category (ADMIN → global; CLIENT → own) |
+| PUT    | `/categories/:id`         | ADMIN/CUSTOMER | Update (ADMIN: defaults+own; CLIENT: own) |
+| PUT    | `/categories/:id/restore` | ADMIN/CUSTOMER | Restore (same ownership rules)            |
+| DELETE | `/categories/:id`         | ADMIN/CUSTOMER | Soft-delete (same ownership rules)        |
+| GET    | `/budgets`                | ADMIN/CUSTOMER | Own budgets + spent/remaining for `from`/`to` |
+| POST   | `/budgets`                | ADMIN/CUSTOMER | Create budget {categoryId, amount}        |
+| PUT    | `/budgets/:id`            | ADMIN/CUSTOMER | Update own budget amount                  |
+| DELETE | `/budgets/:id`            | ADMIN/CUSTOMER | Soft-delete own budget                    |
+| GET    | `/setDefaultValues`       | API Key        | Seed DB with defaults                     |
+| POST   | `/image/:type/:id`        | ADMIN          | Upload image (JPG/PNG ≤ 2MB)              |
+| GET    | `/image/:type/:img`       | ADMIN/CUSTOMER | Retrieve stored image                     |
+| GET    | `/docs`                   | Public         | Swagger UI                                |
 
 ---
 
 ## Frontend
 
-### Tech Stack
+### Frontend Tech Stack
 
 - **Framework:** Angular 18
 - **UI Shell:** Ionic 8
@@ -148,9 +167,9 @@ All routes prefixed with `/api`. Auth column: Public / JWT / ADMIN / CUSTOMER.
 - **Native bridge:** Capacitor 6
 - **Testing:** Karma + Jasmine
 
-### src/ Folder Architecture
+### Frontend src/ Folder Architecture
 
-```
+```text
 src/
 ├── main.ts, polyfills.ts, zone-flags.ts
 ├── environments/
@@ -181,7 +200,7 @@ src/
     │
     ├── auth/
     │   ├── model/              user.dto, role.dto, Auth.ts (AuthSuccess shape)
-    │   ├── pages/              login/, sign-up-1/, forget-pass/
+    │   ├── pages/              login/, sign-up-1/, forget-pass/, reset-password/
     │   ├── services/           auth.service.ts — login, logout, hasSession, loadStorage
     │   └── state/              auth.actions, auth.state (IAuthState), permissions.effects
     │
@@ -192,16 +211,16 @@ src/
         │   ├── models/         order.model, category.dto, productFilter.dto, order.filter.dto
         │   ├── services/       workout.service (movements CRUD + categories), order.service
         │   └── state/          workout.actions, workout.effects, workout.selector, workout.state
-        ├── profile/            Tab3 — profile view/edit + avatar upload
+        ├── profile/            Tab3 — profile view/edit + avatar upload + "Mis categorías"
         │   ├── models/         user-updated.ts
         │   └── services/       profile.service.ts (users CRUD)
-        ├── products/           Tab2 — placeholder, NOT IMPLEMENTED
+        ├── products/           Tab2 — "Reportes": monthly bar chart, budgets, CSV export
         └── error-page/         404 page
 ```
 
 ### Hybrid Stack (Capacitor)
 
-```
+```text
 Angular 18 → Ionic 8 → Capacitor 6
                             ├── @capacitor/camera     photo capture / gallery
                             ├── @capacitor/status-bar  status bar theming
@@ -210,11 +229,11 @@ Angular 18 → Ionic 8 → Capacitor 6
                             └── @capacitor/app         app lifecycle events
 ```
 
-App ID: `mx.ramirex.minipos` | Name: `Mini POS` | Targets: iOS, Android, Web
+App ID: `mx.ramirex.finnance-project` | Name: `finnance-project` | Targets: iOS, Android, Web
 
 ### App Flow
 
-```
+```text
 App launch → AuthService.loadStorage()
     ├── Session found  → /tabs/tab1  (Dashboard)
     └── No session     → /authentication/login-1
@@ -228,42 +247,62 @@ Tab1 (Dashboard) → GET /api/movements + GET /api/categories
 
 Tab3 (Profile)  → display user info → edit → PUT /api/users/:id
                → camera → compress (quality 60, max 500×500) → POST /api/image/user/:id
+               → "Mis categorías" → GET/DELETE /api/categories
+
+Tab2 (Reportes) → GET /api/movements/summary/monthly + GET /api/budgets + GET /api/categories
+               → bar chart income vs expense → "Exportar CSV" → GET /api/movements/export
 
 Logout → clear localStorage → dispatch unUser → /authentication/login-1
 ```
 
 ### Communications
 
-```
+```text
 Frontend ──[HTTP + Bearer JWT]──► Backend ──[TypeORM]──► PostgreSQL
 ```
 
 - **AuthInterceptor:** adds `Authorization: Bearer <token>`, 30s timeout, auto-logout on 401
 - **API base URL:** `environment.ts` → update per environment before building
 
-| Service | Hits |
-|---|---|
-| `AuthService` | `POST /auth`, `POST /users`, `GET /users` |
-| `WorkoutService` | `GET/POST/PUT/DELETE /movements`, `GET /categories` |
-| `OrderService` | `GET /movements` |
-| `ProfileService` | `GET/POST/PUT/DELETE /users` |
-| `FileService` | `POST /image/:type/:id` |
+| Service          | Hits                                                |
+| ---------------- | --------------------------------------------------- |
+| `AuthService`    | `POST /auth`, `POST /auth/forgot`, `POST /auth/reset`, `POST /users`, `GET /users` |
+| `WorkoutService` | `GET/POST/PUT/DELETE /movements`, `/movements/summary(+monthly)`, `/movements/export`, `/categories`, `/budgets` |
+| `OrderService`   | `GET /movements`                                    |
+| `ProfileService` | `GET/POST/PUT/DELETE /users`                        |
+| `FileService`    | `POST /image/:type/:id`                             |
 
 ### Functionalities
 
-| Feature | Status |
-|---|---|
-| Login / Logout | Done |
-| Sign up | Done |
-| Dashboard with income/expense chart | Done |
-| Create / edit / delete movements | Done |
-| Filter movements by name and category | Done |
-| View and edit user profile | Done |
-| Upload avatar (camera or gallery) | Done |
-| Offline detection alert | Done |
-| Role-based access control | Done (Tab1 role guard commented out) |
-| Products tab (Tab2) | Not implemented |
-| Password recovery | Page exists, backend logic unconfirmed |
+| Feature                               | Status                                 |
+| ------------------------------------- | -------------------------------------- |
+| Login / Logout                        | Done                                   |
+| Sign up                               | Done                                   |
+| Dashboard with income/expense chart   | Done (+ period selector, summary cards, doughnut) |
+| Create / edit / delete movements      | Done                                   |
+| Filter movements by name, category, date range, income/expense | Done          |
+| View and edit user profile            | Done                                   |
+| Upload avatar (camera or gallery)     | Done                                   |
+| Offline detection alert               | Done                                   |
+| Role-based access control             | Done                                   |
+| Reports tab (Tab2): monthly bar chart + totals | Done                     |
+| Budgets per category                  | Done (in Reports tab)                  |
+| CSV export                            | Done (browser download)                |
+| User-defined categories               | Done (profile "Mis categorías")        |
+| Password recovery                     | Done (Resend email → reset-password page) |
+| MXN currency / es-MX locale           | Done                                   |
+
+---
+
+## Project Docs
+
+- **PRD / requirements:** [`doc/PRD.md`](doc/PRD.md)
+- **Roadmap & next steps:** [`doc/PLAN.md`](doc/PLAN.md)
+- **DeepWiki:** <https://deepwiki.com/MrInternauta/finnance-project> (not indexed yet)
+
+Product decisions (PRD §7): roles = super admin (`ADMIN`) + default user (`CLIENT`, auto-assigned
+at sign-up); currency **MXN only**; password reset email via **Resend**; categories = global
+defaults + user-defined.
 
 ---
 
@@ -271,7 +310,7 @@ Frontend ──[HTTP + Bearer JWT]──► Backend ──[TypeORM]──► Pos
 
 ### Running Locally (Docker)
 
-```
+```text
 dockerfile              Production image (Node 18)
 dockerfile.dev          Dev image with hot reload
 docker-compose.yml      Production stack
@@ -279,12 +318,14 @@ docker-compose.override.yml  Local dev overrides (auto-merged on docker-compose 
 ```
 
 **Start backend:**
+
 ```bash
 cd backend
 docker-compose up -d
 ```
 
 Spins up:
+
 - `node_dev_finnance` — NestJS on port **3000** (debug: **9229**), hot-reload enabled
 - `postgres_dev_finnance` — PostgreSQL on port **5430** (external)
 
@@ -300,6 +341,7 @@ docker exec node_dev_finnance sh -c \
 ```
 
 **Seed default data (first time only):**
+
 ```bash
 curl -H "auth: 12345a" http://localhost:3000/api/setDefaultValues
 ```
@@ -308,17 +350,19 @@ Creates: 3 roles, 3 users, 15 categories, 5 sample movements.
 
 **Default credentials (all seeded users share the same password):**
 
-| Email | Role | Password |
-|---|---|---|
-| `admin@admin.com` | ADMIN | `1234567890` |
+| Email                 | Role       | Password     |
+| --------------------- | ---------- | ------------ |
+| `admin@admin.com`     | ADMIN      | `1234567890` |
 | `cashier@cashier.com` | CLIENT_PRO | `1234567890` |
-| `client@client.com` | CLIENT | `1234567890` |
+| `client@client.com`   | CLIENT     | `1234567890` |
 
 **Verify:**
-- Swagger UI: http://localhost:3000/docs
+
+- Swagger UI: <http://localhost:3000/docs>
 - Login: `POST http://localhost:3000/api/auth` `{ "email": "admin@admin.com", "password": "1234567890" }`
 
 **Stop:**
+
 ```bash
 docker-compose down          # stop containers, keep DB volume
 docker-compose down -v       # stop + wipe DB volume
@@ -326,6 +370,7 @@ docker-compose down -v       # stop + wipe DB volume
 
 **Known gotcha — duplicate `devred` network:**
 If `docker-compose up` fails with `network devred is ambiguous`, remove the orphan networks:
+
 ```bash
 docker network ls --filter name=devred   # find the IDs
 docker network rm <id1> <id2>            # remove both
@@ -347,10 +392,13 @@ docker-compose up -d                     # retry
 - **Migrations path:** `backend/src/core/database/migrations/`
 - **Data source config:** `backend/src/core/database/data-source.ts`
 
-| Migration | Change |
-|---|---|
-| `1735627479683-migration.ts` | Initial schema — all tables |
-| `1747982567572-migration.ts` | `user.image` → nullable |
+| Migration                    | Change                      |
+| ---------------------------- | ---------------------------------------------------- |
+| `1735627479683-migration.ts` | Initial schema — all tables                          |
+| `1747982567572-migration.ts` | `user.image` → nullable                              |
+| `1795814625128-migration.ts` | Drop movement unique index (name,date,category,income) |
+| `1795815327280-migration.ts` | `category.id_user` FK + `password_reset_token` table |
+| `1795816652908-migration.ts` | `budget` table (user + category FKs)                 |
 
 ```bash
 # Migration commands (run from backend/)
@@ -361,7 +409,7 @@ npm run migrations:revert     # rollback last
 
 ### Required Environment Variables (backend `.env`)
 
-```
+```text
 API_KEY
 JWT_SECRET
 JWT_EXPIRES_IN
@@ -372,6 +420,11 @@ POSTGRES_HOST
 POSTGRES_HOST_EXTERNAL
 POSTGRES_PORT_EXTERNAL
 IMAGES_PATH
+RESEND_API_KEY   (optional — password reset emails)
+RESEND_FROM      (optional — e.g. "Finnance <no-reply@yourdomain>")
+FRONTEND_URL     (optional — used to build reset links)
+CORS_ORIGINS     (optional — comma-separated origin allowlist; Capacitor needs
+                  `capacitor://localhost` and `http://localhost`)
 ```
 
 ---
@@ -385,4 +438,4 @@ IMAGES_PATH
 - **Frontend path alias is `@gymTrack/*`** — leftover name, don't rename without updating `tsconfig.json`.
 - **API base URL is hardcoded** in `frontend/src/environments/environment.ts` — must be updated per environment before building for staging/production.
 - **No queues, no cron jobs, no external payment/notification services** — the backend is fully synchronous.
-- **Tab2 (Products page) is a placeholder** — do not assume it has working logic.
+- **Tab2 is "Reportes"** — the `pages/products/` folder name is kept (renaming would churn paths) but it renders the reports view: monthly chart, budgets, CSV export.

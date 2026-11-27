@@ -1,61 +1,57 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Finnance Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+[![Nest Logo](https://nestjs.com/img/logo-small.svg)](http://nestjs.com/)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
+A progressive [Node.js](http://nodejs.org) framework for building efficient and scalable server-side applications.
+
+[![NPM Version](https://img.shields.io/npm/v/@nestjs/core.svg)](https://www.npmjs.com/~nestjscore)
+[![Package License](https://img.shields.io/npm/l/@nestjs/core.svg)](https://www.npmjs.com/~nestjscore)
+[![NPM Downloads](https://img.shields.io/npm/dm/@nestjs/common.svg)](https://www.npmjs.com/~nestjscore)
+[![CircleCI](https://img.shields.io/circleci/build/github/nestjs/nest/master)](https://circleci.com/gh/nestjs/nest)
+[![Coverage](https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9)](https://coveralls.io/github/nestjs/nest?branch=master)
+[![Discord](https://img.shields.io/badge/discord-online-brightgreen.svg)](https://discord.gg/G7Qnnhy)
+[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
+[![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-ff3f59.svg)](https://paypal.me/kamilmysliwiec)
+[![Support us](https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg)](https://opencollective.com/nest#sponsor)
+[![Follow](https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow)](https://twitter.com/nestframework)
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
 ## Description
 
-Nest store - point of sales
+Finnance — finnance-project
 
 ## Installation
 
 ```bash
-$ npm install
+npm install
 ```
 
 ## Running the app
 
 ```bash
 # development
-$ npm run start
+npm run start
 
 # watch mode
-$ npm run start:dev
+npm run start:dev
 
 # production mode
-$ npm run start:prod
+npm run start:prod
 ```
 
 ## Test
 
 ```bash
 # unit tests
-$ npm run test
+npm run test
 
 # e2e tests
-$ npm run test:e2e
+npm run test:e2e
 
 # test coverage
-$ npm run test:cov
+npm run test:cov
 ```
 
 ## Run migrations
@@ -69,7 +65,7 @@ npx gulp --command="migrations:run"
 
 Nest is [MIT licensed](LICENSE).
 
-# NestJS Notes
+## NestJS Notes
 
 ### One to One relations
 
@@ -78,7 +74,7 @@ User to Customer
 
 - User entity
 
-```
+```ts
   @OneToOne(() => Customer, (costumer) => costumer.user, { nullable: true }) //optional relation | Bidirectional relation (ref)
   @JoinColumn() //Join column (only one table, this table contains the foreign key)
   customer: Customer;
@@ -86,7 +82,7 @@ User to Customer
 
 - Customer entity
 
-```
+```ts
   @OneToOne(() => User, (user) => user.customer, { nullable: true }) //Bidirectional relation (ref)
   user: User;
 ```
@@ -100,11 +96,10 @@ sudo chown -R $(whoami) ~/.docker
 ❯ npx gulp --command="migrations:generate"
 ❯ npx gulp --command="migrations:run"
 
-
 ## Env config
-```
-API_KEY=12345a
 
+```text
+API_KEY=12345a
 
 POSTGRES_DB=mydb
 POSTGRES_USER=postgres
@@ -115,10 +110,18 @@ POSTGRES_HOST=postgres_service_finnance
 POSTGRES_PORT_EXTERNAL=5430
 POSTGRES_HOST_EXTERNAL=localhost
 
-
 JWT_SECRET=abcde123
 JWT_EXPIRES_IN=24h
 
 IMAGES_PATH=files/images
+
+# Optional — password reset emails via Resend
+RESEND_API_KEY=re_xxxxxxxxx
+RESEND_FROM=Finnance <no-reply@yourdomain>
+FRONTEND_URL=http://localhost:8100
+
+# Optional — CORS allowlist (comma-separated; unset = permissive)
+# Capacitor apps need capacitor://localhost and http://localhost
+CORS_ORIGINS=capacitor://localhost,http://localhost
 
 ```

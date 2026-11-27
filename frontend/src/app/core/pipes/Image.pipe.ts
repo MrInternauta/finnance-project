@@ -1,5 +1,5 @@
-import { Pipe, PipeTransform } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Pipe, PipeTransform } from '@angular/core';
 import { environment } from '@gymTrack/environment';
 import { API_PREFIX } from '../constants';
 

@@ -1,5 +1,4 @@
-import { DomSanitizer } from '@angular/platform-browser';
-import { PipeTransform, Pipe } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import { environment } from '../../../environments/environment';
 
 @Pipe({ name: 'getProfile' })

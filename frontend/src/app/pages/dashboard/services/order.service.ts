@@ -2,10 +2,10 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { API_PREFIX } from 'src/app/core/constants';
 
+import { ArticleResponse } from '@gymTrack/pages/dashboard/models';
 import { environment } from '../../../../environments/environment';
 import { OrderFilterDto } from '../models/order.filter.dto';
 import { OrderResponse } from '../models/order.model';
-import { ArticleResponse } from '@gymTrack/pages/dashboard/models';
 
 const API_URL = `${environment.url}${API_PREFIX}movements`;
 

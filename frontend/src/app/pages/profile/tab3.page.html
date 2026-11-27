@@ -95,6 +95,18 @@
           (click)="editProfile()"
         ></app-button>
       </div>
+
+      <div class="mt-8 w-full" *ngIf="myCategories?.length">
+        <h3 class="text-lg font-semibold mb-2">Mis categorías</h3>
+        <ion-list>
+          <ion-item *ngFor="let category of myCategories">
+            <ion-label>{{ category.name }}</ion-label>
+            <ion-button slot="end" fill="clear" color="danger" (click)="deleteCategory(category)">
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </div>
     </div>
   </div>
 </ion-content>

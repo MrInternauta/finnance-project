@@ -20,8 +20,9 @@ export class RolesGuard implements CanActivate {
     }
     const req: Request = context.switchToHttp().getRequest();
     const user = req.user as PayloadToken;
-    const haveRol = roles_allowed.some(rol => rol?.toLocaleLowerCase() === user.role?.toLowerCase());
-    console.log(user, roles_allowed);
+    // CLIENT_PRO is kept as an alias of CLIENT for authorization
+    const userRole = user.role?.toLowerCase() === 'client_pro' ? Role.CUSTOMER : user.role?.toLowerCase();
+    const haveRol = roles_allowed.some(rol => rol?.toLocaleLowerCase() === userRole);
 
     if (!haveRol) {
       throw new UnauthorizedException('The role doesnt have permission');

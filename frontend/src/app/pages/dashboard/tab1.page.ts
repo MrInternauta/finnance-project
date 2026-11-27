@@ -1,14 +1,33 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { Chart, ChartConfiguration, ChartEvent, ChartType } from 'chart.js';
 import { default as Annotation } from 'chartjs-plugin-annotation';
 import { BaseChartDirective } from 'ng2-charts';
 import { Subscription } from 'rxjs';
 
-import { OrderResponse } from './models/order.model';
-import { OrderService } from './services/order.service';
-import { ArticleItemResponse } from './models';
+import { AppState } from '../../core/state/app.reducer';
+import { ArticleItemResponse, MovementSummary } from './models';
+import { ProductsFilterDto } from './models/productFilter.dto';
 import { WorkoutService } from './services/workout.service';
+import { loadDashboard } from './state/workout.actions';
+import { selectMovements, selectSummary } from './state/workout.selector';
+
+type PeriodKey = 'month' | 'lastMonth' | '3months' | 'year';
+type IncomeFilter = 'all' | 'income' | 'expense';
+
+const DOUGHNUT_COLORS = [
+  '#dc2626',
+  '#e11d48',
+  '#f97316',
+  '#f59e0b',
+  '#84cc16',
+  '#16a34a',
+  '#0ea5e9',
+  '#6366f1',
+  '#a855f7',
+  '#64748b',
+];
 
 @Component({
   selector: 'app-tab1',
@@ -16,57 +35,53 @@ import { WorkoutService } from './services/workout.service';
   styleUrls: ['tab1.page.scss'],
 })
 export class Tab1Page implements OnInit, OnDestroy {
-  private newLabel? = 'New label';
-  public historyWorkout:  ArticleItemResponse[] = [];
-  private subscription$!: Subscription;
+  public historyWorkout: ArticleItemResponse[] = [];
+  public summary: MovementSummary | null = null;
+  public period: PeriodKey = 'month';
+  public incomeFilter: IncomeFilter = 'all';
+  private subscription$ = new Subscription();
+
   constructor(
-    private orderService: OrderService,
     public router: Router,
     public activatedRoute: ActivatedRoute,
     public readonly productService: WorkoutService,
-
+    private store: Store<AppState>
   ) {
     Chart.register(Annotation);
   }
 
   public lineChartData: ChartConfiguration['data'] = {
     datasets: [
-        {
-          data: [65, 59, 80, 81, 56, 55, 40],
-          label: 'Ingresos',
-          yAxisID: 'y1',
-          backgroundColor: 'rgba(22,163,74,0.3)',
-          borderColor: '#16a34a',
-          pointBackgroundColor: 'rgba(148,159,177,1)',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: 'rgba(148,159,177,0.8)',
-          fill: 'origin',
-        },
-        {
-          data: [180, 480, 770, 90, 1000, 270, 400],
-          label: 'Gastos',
-          yAxisID: 'y1',
-          backgroundColor: 'rgba(220,38,38,0.3)',
-          borderColor: '#dc2626',
-          pointBackgroundColor: 'rgba(148,159,177,1)',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: 'rgba(148,159,177,0.8)',
-          fill: 'origin',
-        },          
+      {
+        data: [],
+        label: 'Ingresos',
+        yAxisID: 'y1',
+        backgroundColor: 'rgba(22,163,74,0.3)',
+        borderColor: '#16a34a',
+        pointBackgroundColor: 'rgba(148,159,177,1)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(148,159,177,0.8)',
+        fill: 'origin',
+      },
+      {
+        data: [],
+        label: 'Gastos',
+        yAxisID: 'y1',
+        backgroundColor: 'rgba(220,38,38,0.3)',
+        borderColor: '#dc2626',
+        pointBackgroundColor: 'rgba(148,159,177,1)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(148,159,177,0.8)',
+        fill: 'origin',
+      },
     ],
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+    labels: [],
   };
 
   public lineChartOptions: ChartConfiguration['options'] = {
-    // elements: {
-    //   line: {
-    //     tension: 0.5,
-    //   },
-    // },
     scales: {
-      // We use this empty structure as a placeholder for dynamic theming.
       y: {
         position: 'left',
       },
@@ -80,74 +95,124 @@ export class Tab1Page implements OnInit, OnDestroy {
         },
       },
     },
-
-    // plugins: {
-    //   legend: { display: true },
-    //   annotation: {
-    //     annotations: [
-    //       {
-    //         type: 'line',
-    //         scaleID: 'x',
-    //         value: 'March',
-    //         borderColor: 'orange',
-    //         borderWidth: 2,
-    //         label: {
-    //           display: true,
-    //           position: 'center',
-    //           color: 'orange',
-    //           content: 'LineAnno',
-    //           font: {
-    //             weight: 'bold',
-    //           },
-    //         },
-    //       },
-    //     ],
-    //   },
-    // },
   };
 
   public lineChartType: ChartType = 'line';
 
+  public doughnutChartData: ChartConfiguration<'doughnut'>['data'] = {
+    datasets: [
+      {
+        data: [],
+        backgroundColor: DOUGHNUT_COLORS,
+      },
+    ],
+    labels: [],
+  };
+  public doughnutChartOptions: ChartConfiguration<'doughnut'>['options'] = {
+    plugins: {
+      legend: { position: 'bottom' },
+    },
+  };
+  public doughnutChartType = 'doughnut' as const;
+
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
   ngOnInit(): void {
-    this.subscription$ = this.orderService.getOrders().subscribe(response => {
-      this.historyWorkout = response?.movements || [];
-      //asign the response type to the lineChartData.datasets object data depending on the income value (income to [0], outcome to [1])
-      this.lineChartData.datasets[0].data = this.historyWorkout.map(item => item.income ? item.quantity : 0);
-      this.lineChartData.datasets[1].data = this.historyWorkout.map(item => !item.income ? item.quantity : 0);
-      //assign this.lineChartData.labels = this.historyWorkout.map(item => item.date);  with a date short format like 'dd/MM'
-      this.lineChartData.labels = this.historyWorkout.map(item =>{
-        const date = new Date(item.date);
-        return `${date.getDate()}/${date.getMonth()}`;
-      });
+    this.subscription$.add(
+      this.store.select(selectMovements).subscribe(movements => {
+        this.historyWorkout = movements || [];
+        this.lineChartData.datasets[0].data = this.historyWorkout.map(item => (item.income ? item.quantity : 0));
+        this.lineChartData.datasets[1].data = this.historyWorkout.map(item => (!item.income ? item.quantity : 0));
+        this.lineChartData.labels = this.historyWorkout.map(item => {
+          const date = new Date(item.date);
+          return `${date.getDate()}/${date.getMonth() + 1}`;
+        });
+      })
+    );
 
-    });
+    this.subscription$.add(
+      this.store.select(selectSummary).subscribe(summary => {
+        this.summary = summary;
+        const expenses = (summary?.byCategory || []).filter(item => item.expense > 0);
+        this.doughnutChartData = {
+          datasets: [
+            {
+              data: expenses.map(item => item.expense),
+              backgroundColor: DOUGHNUT_COLORS,
+            },
+          ],
+          labels: expenses.map(item => item.name),
+        };
+      })
+    );
+
+    this.reload();
   }
 
   ngOnDestroy(): void {
-    this.subscription$?.unsubscribe();
+    this.subscription$.unsubscribe();
     this.historyWorkout = [];
   }
-  
+
   get totalIncome(): number {
-    return this.historyWorkout.reduce((acc, item) => item.income ? acc + item.quantity : acc, 0) || 0;
+    return (
+      this.summary?.income ??
+      (this.historyWorkout.reduce((acc, item) => (item.income ? acc + item.quantity : acc), 0) || 0)
+    );
   }
   get totalOutcome(): number {
-    return this.historyWorkout.reduce((acc, item) => !item.income ? acc + item.quantity : acc, 0) || 0;
+    return (
+      this.summary?.expense ??
+      (this.historyWorkout.reduce((acc, item) => (!item.income ? acc + item.quantity : acc), 0) || 0)
+    );
+  }
+  get balance(): number {
+    return this.summary?.balance ?? this.totalIncome - this.totalOutcome;
+  }
+  get hasExpenseByCategory(): boolean {
+    return (this.summary?.byCategory || []).some(item => item.expense > 0);
   }
 
-  private static generateNumber(i: number): number {
-    return Math.floor(Math.random() * (i < 2 ? 100 : 1000) + 1);
+  onPeriodChange(event: any) {
+    this.period = event?.detail?.value || 'month';
+    this.reload();
   }
 
-  public randomize(): void {
-    for (let i = 0; i < this.lineChartData.datasets.length; i++) {
-      for (let j = 0; j < this.lineChartData.datasets[i].data.length; j++) {
-        this.lineChartData.datasets[i].data[j] = Tab1Page.generateNumber(i);
+  onIncomeFilterChange(event: any) {
+    this.incomeFilter = event?.detail?.value || 'all';
+    this.reload();
+  }
+
+  private periodRange(): { from?: string; to?: string } {
+    const now = new Date();
+    const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const endOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+    switch (this.period) {
+      case 'lastMonth': {
+        const first = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const last = new Date(now.getFullYear(), now.getMonth(), 0);
+        return { from: startOfDay(first).toISOString(), to: endOfDay(last).toISOString() };
+      }
+      case '3months': {
+        const first = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+        return { from: startOfDay(first).toISOString(), to: endOfDay(now).toISOString() };
+      }
+      case 'year': {
+        return { from: new Date(now.getFullYear(), 0, 1).toISOString(), to: endOfDay(now).toISOString() };
+      }
+      case 'month':
+      default: {
+        return { from: new Date(now.getFullYear(), now.getMonth(), 1).toISOString(), to: endOfDay(now).toISOString() };
       }
     }
-    this.chart?.update();
+  }
+
+  reload() {
+    const params: ProductsFilterDto = { ...this.periodRange(), limit: 500 };
+    if (this.incomeFilter !== 'all') {
+      params.income = this.incomeFilter === 'income';
+    }
+    this.store.dispatch(loadDashboard({ params }));
   }
 
   // events
@@ -159,39 +224,8 @@ export class Tab1Page implements OnInit, OnDestroy {
     console.log(event, active);
   }
 
-  public hideOne(): void {
-    const isHidden = this.chart?.isDatasetHidden(1);
-    this.chart?.hideDataset(1, !isHidden);
-  }
-
-  public pushOne(): void {
-    this.lineChartData.datasets.forEach((x, i) => {
-      const num = Tab1Page.generateNumber(i);
-      x.data.push(num);
-    });
-    this.lineChartData?.labels?.push(`Label ${this.lineChartData.labels.length}`);
-
-    this.chart?.update();
-  }
-
-  public changeColor(): void {
-    this.lineChartData.datasets[2].borderColor = 'green';
-    this.lineChartData.datasets[2].backgroundColor = `rgba(0, 255, 0, 0.3)`;
-
-    this.chart?.update();
-  }
-
-  public changeLabel(): void {
-    const tmp = this.newLabel;
-    this.newLabel = this.lineChartData.datasets[2].label;
-    this.lineChartData.datasets[2].label = tmp;
-
-    this.chart?.update();
-  }
   public onItemClicked(item: ArticleItemResponse): void {
-    console.log(item);
-    
     this.productService.product = item;
-    this.router.navigate(['tabs', 'tab1', 'detail'], );
+    this.router.navigate(['tabs', 'tab1', 'detail']);
   }
 }

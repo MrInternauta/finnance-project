@@ -1,13 +1,9 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { NavController } from '@ionic/angular';
 import { Network } from '@awesome-cordova-plugins/network/ngx';
+import { NavController } from '@ionic/angular';
 
-import {
-  LoadingController,
-  ToastController,
-  AlertController,
-} from '@ionic/angular';
+import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root',
@@ -44,7 +40,7 @@ export class ToolsService {
     });
 
     // watch network for a connection
-    let connectSubscription = this.network.onConnect().subscribe(async () => {
+    this.network.onConnect().subscribe(async () => {
       //Quitar alert solo cuando ya se aya puessto el alert
       if (wasDismissed) {
         this.alertInternet.dismiss();
@@ -123,8 +119,8 @@ export class ToolsService {
   async MostrarAlert(
     header: string,
     message: string,
-    cancelCallback: Function,
-    aceptCallback: Function,
+    cancelCallback: () => void,
+    aceptCallback: () => void,
     textcancel: string = 'Cancelar',
     textAcept: string = 'Aceptar',
     cssClass: string = 'alerta-personalizada-aceptcancel',
@@ -179,7 +175,7 @@ export class ToolsService {
       },
     ]
   ) {
-    let alert = await this.alertController.create({
+    const alert = await this.alertController.create({
       header,
       subHeader,
       message,
@@ -216,8 +212,7 @@ export class ToolsService {
     this.alerVersionApp = await this.alertController.create({
       header: 'Actualiza la app',
       subHeader: '',
-      message:
-        'Tienes una versión anterior, por favor actualiza la app para seguir disfrutando del servicio.',
+      message: 'Tienes una versión anterior, por favor actualiza la app para seguir disfrutando del servicio.',
       // buttons: ['Ok'],
       backdropDismiss: false,
     });

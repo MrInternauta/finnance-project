@@ -1,12 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { API_PREFIX } from 'src/app/core/constants';
-import { GenericResponse, IExercise, User } from 'src/app/core/models';
-import { environment } from '../../../../environments/environment';
 import { UserDto, UserUpdateDto } from '@gymTrack/auth/model/user.dto';
 import { ProductsFilterDto } from '@gymTrack/pages/dashboard/models/productFilter.dto';
-import { UserUpdatedResponse } from '../models';
+import { API_PREFIX } from 'src/app/core/constants';
+import { environment } from '../../../../environments/environment';
 import { ArticleItemResponse } from '../../dashboard/models/index';
+import { UserUpdatedResponse } from '../models';
 const API_URL = `${environment.url}${API_PREFIX}users`;
 
 @Injectable({

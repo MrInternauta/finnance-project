@@ -66,7 +66,6 @@ export class IEquipment {
     public link?: string,
     public image1?: string,
     public image2?: string,
-    public image3?: string,
-    exercises?: IExercise[]
+    public image3?: string
   ) {}
 }

@@ -2,7 +2,7 @@
 
 ## Description
 
-Nest store - Backend
+NestJS - Backend
 Ionic Framework - Frontend
 
 ## Images

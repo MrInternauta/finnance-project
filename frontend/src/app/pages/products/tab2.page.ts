@@ -1,15 +1,10 @@
-/* eslint-disable @angular-eslint/no-empty-lifecycle-method */
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AlertController, ModalController, ToastController } from '@ionic/angular';
-import { Store } from '@ngrx/store';
-// eslint-disable-next-line
-import { map, Observable, Subscription, take } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AlertController } from '@ionic/angular';
+import { ChartConfiguration } from 'chart.js';
+import { Subscription } from 'rxjs';
 
 import { ModalInfoService } from '../../core/services/modal.service';
-import { AppState } from '../../core/state/app.reducer';
-import { DetailComponent } from '../dashboard/detail/detail.component';
-import { ArticleCreate, ArticleItemResponse, CategoryItemResponse } from '../dashboard/models';
+import { BudgetItem, CategoryItemResponse, MonthSummary } from '../dashboard/models';
 import { ProductsFilterDto } from '../dashboard/models/productFilter.dto';
 import { WorkoutService } from '../dashboard/services/workout.service';
 
@@ -18,258 +13,197 @@ import { WorkoutService } from '../dashboard/services/workout.service';
   templateUrl: 'tab2.page.html',
   styleUrls: ['tab2.page.scss'],
 })
-export class Tab2Page implements OnDestroy, OnInit {
-  @ViewChild('search') search: any;
-  $susctiption!: Subscription;
-  $susctiptionSearch!: Subscription;
-  $susctiptionParams!: Subscription;
-  productSuscription$!: Subscription;
-  public $observable!: Observable<any>;
-  public tempProduc$!: Observable<any> | null;
-  public searchValue!: string | null;
-  message = 'This modal example uses the modalController to present and dismiss modals.';
-  public selectedFilteritem!: string;
-  public historyWorkout!: Array<any>;
-  public filter!: ProductsFilterDto;
-  subscriptionCategories$!: Subscription;
-  public categories!: Array<CategoryItemResponse>;
-  constructor(
-    private toastController: ToastController,
-    private store: Store<AppState>,
-    public router: Router,
-    public activatedRoute: ActivatedRoute,
-    private alertController: AlertController,
-    private exercisesService: WorkoutService,
-    private modalInfoService: ModalInfoService,
-    private modalCtrl: ModalController,
-    private productService: WorkoutService
-  ) {
-    this.loadProducts();
-    // this.$observable = this.store.select('exercises');
-    this.$observable.subscribe(value => {
-      console.log(value?.Exercise);
-    });
-  }
+export class Tab2Page implements OnInit, OnDestroy {
+  public period: '6months' | '12months' | 'year' = '6months';
+  public months: MonthSummary[] = [];
+  public budgets: BudgetItem[] = [];
+  public categories: CategoryItemResponse[] = [];
+  private subscription$?: Subscription;
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  public barChartData: ChartConfiguration<'bar'>['data'] = { labels: [], datasets: [] };
+  public barChartOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom' },
+    },
+  };
+  public barChartType = 'bar' as const;
+
+  constructor(
+    private workoutService: WorkoutService,
+    private alertController: AlertController,
+    private modalInfoService: ModalInfoService
+  ) {}
+
   ngOnInit(): void {
-    this.setDefaultFilter();
-    this.getCategories();
+    this.reload();
   }
 
   ngOnDestroy(): void {
-    this.$susctiption?.unsubscribe();
-    this.$susctiptionSearch?.unsubscribe();
-    this.$susctiptionParams?.unsubscribe();
-    this.productSuscription$?.unsubscribe();
+    this.subscription$?.unsubscribe();
   }
 
-  setDefaultFilter() {
-    this.selectedFilteritem = '';
-    // this.filter = {
-    //   limit: 1000,
-    //   maxPrice: 9999,
-    //   minPrice: 0,
-    //   offset: 0,
-    //   categoryId: '',
-    // };
+  onPeriodChange(event: any) {
+    this.period = event?.detail?.value || '6months';
+    this.reload();
   }
 
-  loadProducts() {
-    this.productSuscription$ = this.exercisesService.getProducts(this.filter).subscribe(
-      response => {
-        // if (response) this.store.dispatch(loadedExercise({ Exercise: response }));
+  private periodRange(): { from?: string; to?: string } {
+    const now = new Date();
+    const endOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+    switch (this.period) {
+      case '12months':
+        return {
+          from: new Date(now.getFullYear(), now.getMonth() - 11, 1).toISOString(),
+          to: endOfDay(now).toISOString(),
+        };
+      case 'year':
+        return { from: new Date(now.getFullYear(), 0, 1).toISOString(), to: endOfDay(now).toISOString() };
+      case '6months':
+      default:
+        return {
+          from: new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString(),
+          to: endOfDay(now).toISOString(),
+        };
+    }
+  }
+
+  reload() {
+    const params: ProductsFilterDto = this.periodRange();
+    this.subscription$?.unsubscribe();
+    this.subscription$ = new Subscription();
+    this.subscription$.add(
+      this.workoutService.getMonthlySummary(params).subscribe(res => {
+        this.months = res?.months || [];
+        this.barChartData = {
+          labels: this.months.map(item => item.month),
+          datasets: [
+            { data: this.months.map(item => item.income), label: 'Ingresos', backgroundColor: '#22c55e' },
+            { data: this.months.map(item => item.expense), label: 'Gastos', backgroundColor: '#dc2626' },
+          ],
+        };
+      })
+    );
+    this.subscription$.add(
+      this.workoutService.getBudgets(params).subscribe(res => {
+        this.budgets = res?.budgets || [];
+      })
+    );
+    this.subscription$.add(
+      this.workoutService.getCategories().subscribe(res => {
+        this.categories = res?.categories || [];
+      })
+    );
+  }
+
+  budgetPercent(budget: BudgetItem): number {
+    if (!budget.amount) {
+      return 0;
+    }
+    return Math.min(Math.round((budget.spent / budget.amount) * 100), 100);
+  }
+
+  budgetColor(budget: BudgetItem): string {
+    return budget.spent > budget.amount ? 'danger' : 'primary';
+  }
+
+  exportCsv() {
+    const params = this.periodRange();
+    this.workoutService.exportCsv(params).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `movimientos-${params.from?.slice(0, 10)}-${params.to?.slice(0, 10)}.csv`;
+        anchor.click();
+        URL.revokeObjectURL(url);
       },
-      async error => {
-        const toast = await this.toastController.create({
-          cssClass: 'my-custom-toast',
-          header: 'Algo salio mal: ',
-          message: error,
-          duration: 3000,
-          position: 'top',
-          icon: 'checkmark-circle-outline',
-          color: 'primary',
-          buttons: [
-            {
-              icon: 'close',
-              htmlAttributes: {
-                'aria-label': 'close',
-              },
-            },
-          ],
-        });
-        toast.present();
-      }
-    );
+      error: () => this.modalInfoService.error('No se pudo exportar el CSV', ''),
+    });
   }
 
-  searchFunction($termSearch: any) {
-    const value = $termSearch;
-    if (!value || value?.length < 3) {
-      this.tempProduc$ = null;
+  async addBudget() {
+    if (!this.categories.length) {
+      this.modalInfoService.warning('Primero crea una categoría', '');
       return;
     }
-    this.tempProduc$ = this.$observable.pipe(
-      map(item_ =>
-        item_?.Exercise?.products.filter(
-          (item: ArticleItemResponse) =>
-            String(item.name).toLocaleLowerCase().includes(String(value).toLocaleLowerCase()) ||
-            String(item.description).toLocaleLowerCase().includes(String(value).toLocaleLowerCase())
-        )
-      )
-    );
-  }
-
-  searchbyCode(code: string) {
-    if (!code || code?.length < 3) {
-      this.searchValue = null;
-      this.tempProduc$ = null;
-      return;
-    }
-
-    this.$susctiptionSearch = this.$observable
-      .pipe(
-        take(1),
-        map(item_ =>
-          item_?.Exercise?.products.filter((item: any) =>
-            String(item.code).toLocaleLowerCase().includes(String(code).toLocaleLowerCase())
-          )
-        )
-      )
-      .subscribe(async (products: Array<ArticleItemResponse> | null) => {
-        if (!products?.length || !products[0]) {
-          const alert = await this.alertController.create({
-            header: 'Producto no encontrado',
-            message: '¿Quieres registrarlo?',
-            buttons: [
-              {
-                text: 'Cancelar',
-                role: 'cancel',
-                cssClass: 'secondary',
-              },
-              {
-                text: 'Registrar',
-                handler: () => {},
-              },
-            ],
-          });
-          alert.present();
-          return;
-        }
-        const alert = await this.alertController.create({
-          header: 'Producto encontrado',
-          message: '¿Quieres agregar al carrito?',
-          buttons: [
-            {
-              text: 'Editar',
-              role: 'cancel',
-              cssClass: 'secondary',
-              handler: () => {
-                this.edit(products[0]);
-              },
-            },
-            {
-              text: 'Agregar al Carrito',
-              handler: () => {
-                this.addToCard(products[0], 1);
-              },
-            },
-          ],
-        });
-        alert.present();
-      });
-  }
-
-  async addToCard(article: ArticleItemResponse, quantity: number) {
-    // this.store.dispatch(AddProductCart({ article, quantity }));
-    this.presentProductAddedModal(article);
-    //this.router.navigate(['tabs', 'tab4'], { replaceUrl: true });
-  }
-
-  hideSearch() {
-    this.searchValue = null;
-    this.tempProduc$ = null;
-  }
-
-  async presentProductAddedModal(article: ArticleItemResponse) {
-    const toast = await this.toastController.create({
-      cssClass: 'my-custom-toast',
-      header: 'Producto agregado al carrito: ',
-      message: article.name,
-      duration: 3000,
-      position: 'top',
-      icon: 'checkmark-circle-outline',
-      color: 'success',
+    const picker = await this.alertController.create({
+      header: 'Categoría',
+      inputs: this.categories.map(category => ({
+        type: 'radio',
+        label: category.name,
+        value: category.id,
+      })),
       buttons: [
+        { text: 'Cancelar', role: 'cancel' },
         {
-          icon: 'close',
-          htmlAttributes: {
-            'aria-label': 'close',
+          text: 'Siguiente',
+          handler: categoryId => {
+            if (categoryId) {
+              this.promptBudgetAmount(amount => this.saveNewBudget(categoryId, amount));
+            }
           },
         },
       ],
     });
-    toast.present();
+    await picker.present();
   }
 
-  edit(product: ArticleCreate) {
-    this.openModal(product);
+  async editBudget(budget: BudgetItem) {
+    this.promptBudgetAmount(amount => this.saveBudgetAmount(budget.id, amount), budget.amount);
   }
 
-  async openModal(product?: ArticleCreate) {
-    const modal = await this.modalCtrl.create({
-      component: DetailComponent,
-      componentProps: { product },
+  private async promptBudgetAmount(onAccept: (amount: number) => void, current?: number) {
+    const alert = await this.alertController.create({
+      header: 'Monto del presupuesto',
+      inputs: [{ name: 'amount', type: 'number', placeholder: 'Monto', value: current }],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Guardar',
+          handler: data => {
+            const amount = Number(data?.amount);
+            if (amount > 0) {
+              onAccept(amount);
+            }
+          },
+        },
+      ],
     });
-    modal.present();
-
-    const { data, role } = await modal.onWillDismiss();
-    if (role == 'created') {
-      //set data
-      console.log(data);
-      this.loadProducts();
-    }
-
-    if (role == 'updated') {
-      //update data
-      console.log(data);
-      this.loadProducts();
-    }
+    await alert.present();
   }
 
-  focusButton(): void {
-    setTimeout(() => {
-      this.search.setFocus();
-    }, 500);
-  }
-
-  clickedItem(value: string) {
-    this.selectedFilteritem = value;
-    switch (value) {
-      case 'more':
-        //this.showClearButton = true;
-        break;
-      case 'less':
-        //this.showClearButton = true;
-        break;
-      default:
-        this.setDefaultFilter();
-        this.loadProducts();
-        break;
-    }
-  }
-
-  clickedCategory(value: string) {
-    this.setDefaultFilter();
-    // this.filter.categoryId = value;
-    this.loadProducts();
-    //this.showClearButton = true;
-  }
-
-  getCategories() {
-    this.subscriptionCategories$ = this.productService.getCategories().subscribe(categoriesResponse => {
-      // this.categories = categoriesResponse?.categories || [];
-      console.log(this.categories);
+  private saveNewBudget(categoryId: number, amount: number) {
+    this.workoutService.postBudget(categoryId, amount).subscribe({
+      next: () => this.reload(),
+      error: err => this.modalInfoService.error(err?.error?.message || 'No se pudo crear el presupuesto', ''),
     });
+  }
+
+  private saveBudgetAmount(budgetId: number, amount: number) {
+    this.workoutService.putBudget(budgetId, amount).subscribe({
+      next: () => this.reload(),
+      error: err => this.modalInfoService.error(err?.error?.message || 'No se pudo actualizar el presupuesto', ''),
+    });
+  }
+
+  async deleteBudget(budget: BudgetItem) {
+    const alert = await this.alertController.create({
+      header: 'Eliminar presupuesto',
+      message: `¿Eliminar el presupuesto de "${budget.category?.name}"?`,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Eliminar',
+          handler: () => {
+            this.workoutService.deleteBudget(budget.id).subscribe({
+              next: () => this.reload(),
+              error: () => this.modalInfoService.error('No se pudo eliminar el presupuesto', ''),
+            });
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 }

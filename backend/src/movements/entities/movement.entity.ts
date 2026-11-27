@@ -1,4 +1,4 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { BasicEntity } from '../../core/interfaces/basic.entity';
 import { Category } from './category.entity';
@@ -8,7 +8,6 @@ import { User } from '../../users/entities/user.entity';
 @Entity({
   name: 'movement',
 }) //naming table
-@Index(['name', 'date', 'category', 'income'], { unique: true }) //naming index
 export class Product extends BasicEntity {
   @PrimaryGeneratedColumn()
   id: number;

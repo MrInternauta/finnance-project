@@ -1,8 +1,10 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Between, FindOptionsWhere, Repository } from 'typeorm';
+import { Between, FindOptionsWhere, ILike, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
+import { escapeLike } from '../../core/util/escape-like';
+import { User } from '../../users/entities/user.entity';
 import { CreateMovementDto, UpdateMovementDto } from '../dtos/movement.dto';
 import { MovementsFilterDto } from '../dtos/movementFilter.dto';
 import { Product } from '../entities/movement.entity';
@@ -15,37 +17,141 @@ export class MovementsService {
     private categoryService: CategoriesService
   ) {}
 
-  public async findAll(params?: MovementsFilterDto) {
-    if (!params)
+  public async findAll(params: MovementsFilterDto | undefined, userId: number) {
+    const where: FindOptionsWhere<Product> = { user: { id: userId } };
+    if (!params) {
       return this.productRepo.find({
         relations: ['category'],
+        where,
+        order: { date: 'DESC' },
       });
-    const where: FindOptionsWhere<Product> = {};
+    }
     const { limit, offset } = params;
     if (params?.name) {
-      where.name = params.name;
+      where.name = ILike(`%${escapeLike(params.name)}%`);
     }
 
     if (params?.categoryId) {
       where.category = { id: params.categoryId };
     }
 
-    const res = await this.productRepo.find({
+    if (params?.from && params?.to) {
+      where.date = Between(params.from, params.to);
+    } else if (params?.from) {
+      where.date = MoreThanOrEqual(params.from);
+    } else if (params?.to) {
+      where.date = LessThanOrEqual(params.to);
+    }
+
+    const income =
+      params?.income ?? (params?.type === 'income' ? true : params?.type === 'expense' ? false : undefined);
+    if (income !== undefined) {
+      where.income = income;
+    }
+
+    return this.productRepo.find({
       relations: ['category'],
       take: limit,
       skip: offset,
       where,
       order: { date: 'DESC' },
     });
-
-    console.log(res);
-    return res;
   }
 
-  public async findOne(idProduct: number, whithRelations = true) {
+  public async getSummary(userId: number, from?: Date, to?: Date) {
+    const qb = this.productRepo
+      .createQueryBuilder('movement')
+      .leftJoin('movement.category', 'category')
+      .select('category.id', 'categoryId')
+      .addSelect('category.name', 'name')
+      .addSelect(`COALESCE(SUM(CASE WHEN movement.income THEN movement.quantity ELSE 0 END), 0)`, 'income')
+      .addSelect(`COALESCE(SUM(CASE WHEN movement.income THEN 0 ELSE movement.quantity END), 0)`, 'expense')
+      .where('movement.id_user = :userId', { userId })
+      .groupBy('category.id')
+      .addGroupBy('category.name');
+
+    if (from) {
+      qb.andWhere('movement.date >= :from', { from });
+    }
+    if (to) {
+      qb.andWhere('movement.date <= :to', { to });
+    }
+
+    const rows: Array<{ categoryId: number | null; name: string | null; income: string; expense: string }> =
+      await qb.getRawMany();
+
+    const byCategory = rows.map(row => ({
+      categoryId: row.categoryId ?? null,
+      name: row.name ?? 'Sin categoría',
+      income: Number(row.income) || 0,
+      expense: Number(row.expense) || 0,
+    }));
+
+    const income = byCategory.reduce((acc, row) => acc + row.income, 0);
+    const expense = byCategory.reduce((acc, row) => acc + row.expense, 0);
+
+    return {
+      from: from ?? null,
+      to: to ?? null,
+      income,
+      expense,
+      balance: income - expense,
+      byCategory,
+    };
+  }
+
+  public async getMonthlySummary(userId: number, from?: Date, to?: Date) {
+    const qb = this.productRepo
+      .createQueryBuilder('movement')
+      .select(`date_trunc('month', movement.date)`, 'month')
+      .addSelect(`COALESCE(SUM(CASE WHEN movement.income THEN movement.quantity ELSE 0 END), 0)`, 'income')
+      .addSelect(`COALESCE(SUM(CASE WHEN movement.income THEN 0 ELSE movement.quantity END), 0)`, 'expense')
+      .where('movement.id_user = :userId', { userId })
+      .groupBy(`date_trunc('month', movement.date)`)
+      .orderBy(`date_trunc('month', movement.date)`, 'ASC');
+
+    if (from) {
+      qb.andWhere('movement.date >= :from', { from });
+    }
+    if (to) {
+      qb.andWhere('movement.date <= :to', { to });
+    }
+
+    const rows: Array<{ month: Date | string; income: string; expense: string }> = await qb.getRawMany();
+
+    return rows.map(row => {
+      const month = row.month instanceof Date ? row.month : new Date(row.month);
+      const income = Number(row.income) || 0;
+      const expense = Number(row.expense) || 0;
+      return {
+        month: `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}`,
+        income,
+        expense,
+        balance: income - expense,
+      };
+    });
+  }
+
+  public async exportCsv(userId: number, from?: Date, to?: Date) {
+    const where: FindOptionsWhere<Product> = { user: { id: userId } };
+    if (from && to) {
+      where.date = Between(from, to);
+    } else if (from) {
+      where.date = MoreThanOrEqual(from);
+    } else if (to) {
+      where.date = LessThanOrEqual(to);
+    }
+    return this.productRepo.find({
+      relations: ['category'],
+      where,
+      order: { date: 'ASC' },
+    });
+  }
+
+  public async findOne(idProduct: number, userId: number, whithRelations = true) {
     const product = await this.productRepo.findOne({
       relations: whithRelations ? ['category'] : [],
-      where: { id: idProduct },
+      where: { id: idProduct, user: { id: userId } },
     });
     if (!product) {
       throw new NotFoundException(`Product ${idProduct} not found`);
@@ -54,86 +160,42 @@ export class MovementsService {
     }
   }
 
-  findOnebyName(name: string) {
-    return this.productRepo.find({
-      where: { name },
-      take: 1,
-      withDeleted: true,
-    });
-  }
-
-  findOnebyCode(code: string) {
-    return this.productRepo.find({
-      take: 1,
-      withDeleted: true,
-    });
-  }
-
-  async validateUniqueName(name: string) {
-    const items = await this.findOnebyName(name);
-    if (items && items.length > 0) {
-      throw new BadRequestException(`Product with name '${name}' already exists`);
+  public async create(payload: CreateMovementDto, userId: number) {
+    const product = this.productRepo.create(payload);
+    product.user = { id: userId } as User;
+    if (payload.categoryId) {
+      product.category = await this.categoryService.assertUsableBy(payload.categoryId, userId);
     }
+    return this.productRepo.save(product);
   }
 
-  async validateUniqueCode(code: string) {
-    const items = await this.findOnebyCode(code);
-    if (items && items.length > 0) {
-      throw new BadRequestException(`Product with code '${code}' already exists`);
+  public async update(id: number, payload: UpdateMovementDto, userId: number) {
+    let product = await this.findOne(id, userId);
+    if (payload?.categoryId) {
+      product.category = await this.categoryService.assertUsableBy(payload.categoryId, userId);
     }
+    product = this.productRepo.merge(product, payload);
+    return this.productRepo.save(product);
   }
 
-  public async create(payload: CreateMovementDto) {
-    try {
-      await this.validateUniqueName(payload.name);
-      const product = this.productRepo.create(payload);
-      if (payload.categoryId) {
-        const categories = await this.categoryService.findById(payload.categoryId);
-        product.category = categories;
-      }
-      return this.productRepo.save(product);
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException();
-    }
-  }
-
-  public async update(id: number, payload: UpdateMovementDto) {
-    try {
-      if (payload?.name) {
-        const productsItems = await this.findOnebyName(payload?.name);
-        if (productsItems && productsItems.length > 0 && id.toString() !== productsItems[0].id?.toString()) {
-          throw new BadRequestException(`Product with name '${payload?.name}' already exists`);
-        }
-      }
-
-      let product = await this.findOne(id);
-      if (payload?.categoryId) {
-        const categories = await this.categoryService.findById(payload.categoryId);
-        product.category = categories;
-      }
-      product = this.productRepo.merge(product, payload);
-      return this.productRepo.save(product);
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException();
-    }
-  }
-
-
-
-
-  public async remove(id: number) {
-    await this.findOne(id);
+  public async remove(id: number, userId: number) {
+    await this.findOne(id, userId);
     return this.productRepo.softDelete({ id });
   }
 
-  public async restore(id: number) {
+  public async restore(id: number, userId: number) {
+    const product = await this.productRepo.findOne({
+      where: { id, user: { id: userId } },
+      withDeleted: true,
+    });
+    if (!product) {
+      throw new NotFoundException(`Product ${id} not found`);
+    }
     return this.productRepo.restore({ id });
   }
 
   defaultProducts() {
-    const defaultProduct: Array<CreateMovementDto> = [
+    const defaultProduct: Array<CreateMovementDto & { userId: number }> = [
       {
         categoryId: 1,
         userId: 1,
@@ -156,7 +218,7 @@ export class MovementsService {
         name: 'Product 3',
         quantity: 20,
         date: new Date(),
-        income: false
+        income: false,
       },
       {
         categoryId: 4,
@@ -164,7 +226,7 @@ export class MovementsService {
         name: 'Product 4',
         quantity: 30,
         date: new Date(),
-        income: false
+        income: false,
       },
       {
         categoryId: 5,
@@ -173,8 +235,7 @@ export class MovementsService {
         quantity: 50,
         date: new Date(),
         income: true,
-      }
-
+      },
     ];
     return defaultProduct;
   }

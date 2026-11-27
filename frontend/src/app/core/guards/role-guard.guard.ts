@@ -14,7 +14,7 @@ export class RoleGuardGuard implements CanActivate {
   ) {}
   async canActivate(route: ActivatedRouteSnapshot): Promise<boolean> {
     const allowToContinue = await this._UsuarioService.currentUserAllowToContinue(
-      route?.data['roles'] as Array<'ADMIN' | 'CASHIER' | 'CLIENT'>
+      route?.data['roles'] as Array<'ADMIN' | 'CLIENT_PRO' | 'CLIENT'>
     );
     if (!allowToContinue) {
       this.router.navigate(['authentication', 'login-1'], { replaceUrl: true });

@@ -7,24 +7,50 @@
   </ion-toolbar>
 
   <ion-toolbar>
-    <ion-searchbar
-      class="sm:mx-[25%] sm:w-auto"
-      show-cancel-button="focus"
-      show-clear-button="never"
-      cancel-button-icon="trash"
-      placeholder="Buscar..."></ion-searchbar>
+    <ion-segment [value]="period" (ionChange)="onPeriodChange($event)" scrollable="true">
+      <ion-segment-button value="month">
+        <ion-label>Este mes</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="lastMonth">
+        <ion-label>Mes pasado</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="3months">
+        <ion-label>3 meses</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="year">
+        <ion-label>Este año</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment [value]="incomeFilter" (ionChange)="onIncomeFilterChange($event)">
+      <ion-segment-button value="all">
+        <ion-label>Todos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="income">
+        <ion-label>Ingresos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="expense">
+        <ion-label>Gastos</ion-label>
+      </ion-segment-button>
+    </ion-segment>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <div class="flex min-h-full flex-col justify-start px-4 py-4 lg:px-6">
     <div class="sm:mx-auto sm:w-full sm:max-w-sm md:max-w-md">
-      <ion-card color="success" *ngIf="lineChartData.datasets[0].data" id="income">
-        <ion-card-content> Ingresos ${{totalIncome}}</ion-card-content>
+      <ion-card color="success" id="income">
+        <ion-card-content> Ingresos {{totalIncome | currency}}</ion-card-content>
       </ion-card>
 
-      <ion-card color="danger" *ngIf="lineChartData.datasets[1].data">
-        <ion-card-content> Gastos ${{totalOutcome}}</ion-card-content>
+      <ion-card color="danger">
+        <ion-card-content> Gastos {{totalOutcome | currency}}</ion-card-content>
+      </ion-card>
+
+      <ion-card [color]="balance >= 0 ? 'success' : 'danger'">
+        <ion-card-content> Balance {{balance | currency}}</ion-card-content>
       </ion-card>
 
       <canvas
@@ -36,6 +62,16 @@
         [type]="lineChartType"
         (chartHover)="chartHovered($event)"
         (chartClick)="chartClicked($event)"></canvas>
+
+      <h3 class="mt-4 text-center text-lg font-semibold" *ngIf="hasExpenseByCategory">Gastos por categoría</h3>
+      <canvas
+        *ngIf="hasExpenseByCategory"
+        baseChart
+        class="chart"
+        [data]="doughnutChartData"
+        [options]="doughnutChartOptions"
+        [type]="doughnutChartType"></canvas>
+
       <div *ngIf="!historyWorkout?.length" class="flex min-h-full flex-col justify-center">
         <div class="sm:mx-auto sm:w-full sm:max-w-sm md:max-w-md">
           <h2 class="mt-4 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Sin movimientos!</h2>

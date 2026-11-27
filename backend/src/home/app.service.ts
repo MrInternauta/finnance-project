@@ -24,7 +24,7 @@ export class AppService {
   async setDefaultValues() {
     try {
       const roles = this.rolesService.defaultValuesRole();
-      
+
       const role_admin = await this.rolesService.create({
         name: roles.role_admin.name,
         permissions: roles.role_admin.permissions,
@@ -49,30 +49,29 @@ export class AppService {
       console.log(admin, cashier, client);
 
       admin.role = role_admin;
-      await this.usersService.update(admin.id, admin);
+      await this.usersService.update(admin.id, admin, true);
 
       cashier.role = role_cashier;
-      await this.usersService.update(cashier.id, cashier);
+      await this.usersService.update(cashier.id, cashier, true);
 
       client.role = role_client;
-      await this.usersService.update(client.id, client);
+      await this.usersService.update(client.id, client, true);
 
       console.log(admin, cashier, client);
 
       const categories = this.categoriesServices.defaultValue();
-      categories.map(async item => {
-        await this.categoriesServices.create(item);
-      });
+      for (const item of categories) {
+        await this.categoriesServices.create(item, { userId: 1, isAdmin: true });
+      }
 
       const products = this.productsServices.defaultProducts();
-      products.map(async item => {
-        await this.productsServices.create(item);
-      });
+      for (const item of products) {
+        await this.productsServices.create(item, item.userId);
+      }
 
       return {
         message: 'Values set successfully!',
       };
-      
     } catch (error) {
       console.log(error);
       throw new BadRequestException('Values already set');

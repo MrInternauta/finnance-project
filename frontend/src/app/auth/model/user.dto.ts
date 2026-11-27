@@ -1,5 +1,3 @@
-
-
 export interface UserDto {
   id?: number;
 
@@ -15,13 +13,12 @@ export interface UserDto {
 
   role?: {
     id: number;
-    name: 'ADMIN' | 'CASHIER' | 'CLIENT';
+    name: 'ADMIN' | 'CLIENT_PRO' | 'CLIENT';
     permissions?: Array<any>;
   };
 
   image?: string;
 }
-
 
 export interface UserUpdateDto {
   name?: string;
@@ -32,7 +29,7 @@ export interface UserUpdateDto {
 
   role?: {
     id: number;
-    name: 'ADMIN' | 'CASHIER' | 'CLIENT';
+    name: 'ADMIN' | 'CLIENT_PRO' | 'CLIENT';
     permissions?: Array<any>;
   };
 }

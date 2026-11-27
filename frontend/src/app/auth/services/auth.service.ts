@@ -67,6 +67,14 @@ export class AuthService {
     return this.http.post<UserCreatedResponse>(`${API_URL}users`, user);
   }
 
+  forgotPassword(email: string) {
+    return this.http.post<{ message: string }>(`${API_URL}auth/forgot`, { email });
+  }
+
+  resetPassword(token: string, password: string) {
+    return this.http.post<{ message: string }>(`${API_URL}auth/reset`, { token, password });
+  }
+
   getUserbyId() {
     return this.http.get<UserCreatedResponse>(`${API_URL}users`);
   }
@@ -75,7 +83,7 @@ export class AuthService {
     return this._auth?.id != null && this._auth?.token != null && this._auth?.user != null;
   }
 
-  async currentUserAllowToContinue(roles: Array<'ADMIN' | 'CASHIER' | 'CLIENT'>) {
+  async currentUserAllowToContinue(roles: Array<'ADMIN' | 'CLIENT_PRO' | 'CLIENT'>) {
     if (!roles) {
       return false;
     }
@@ -83,7 +91,6 @@ export class AuthService {
     if (!roles?.length) {
       return false;
     }
-    console.log(roles, this._auth?.user);
 
     return roles.some((role: string) => {
       return role.toLowerCase() == String(this._auth?.user?.role?.name || '').toLowerCase();
