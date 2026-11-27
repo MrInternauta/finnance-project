@@ -2,7 +2,8 @@ import { en_US, NZ_I18N } from 'ng-zorro-antd/i18n';
 
 import { LocationStrategy, PathLocationStrategy, registerLocaleData } from '@angular/common';
 import en from '@angular/common/locales/en';
-import { NgModule } from '@angular/core';
+import esMX from '@angular/common/locales/es-MX';
+import { LOCALE_ID, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
 import { AuthModule } from '@gymTrack/auth';
@@ -20,6 +21,7 @@ import { PermissionsEffects } from './auth/state/permissions.effects';
 import { ExercisesEffects } from './pages/dashboard/state/workout.effects';
 
 registerLocaleData(en);
+registerLocaleData(esMX);
 
 @NgModule({
   declarations: [
@@ -39,6 +41,7 @@ registerLocaleData(en);
   ],
   providers: [
     Network,
+    { provide: LOCALE_ID, useValue: 'es-MX' },
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: NZ_I18N, useValue: en_US },
     {

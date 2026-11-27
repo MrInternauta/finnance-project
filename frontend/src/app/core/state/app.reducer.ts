@@ -5,12 +5,12 @@ import * as product from '../../pages/dashboard/state/workout.state';
 
 export interface AppState {
   session_data: auth.IAuthState;
-  // exercises: product.ExerciseState;
+  exercises: product.ExerciseState;
   // cart: cart.CartState;
 }
 
 export const appReducers: ActionReducerMap<AppState> = {
   session_data: auth.authReducer,
-  // exercises: product.ExerciseReducer,
+  exercises: product.ExerciseReducer,
   // cart: cart.CartReducer,
 };

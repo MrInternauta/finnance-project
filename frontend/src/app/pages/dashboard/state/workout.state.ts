@@ -1,15 +1,18 @@
 import { Action, createReducer, on } from '@ngrx/store';
-import { loadedExercise } from './workout.actions';
+import { loadedDashboard, loadedExercise } from './workout.actions';
 import { IExercise } from '@gymTrack/core';
-import { ArticleItemResponse, ArticleResponse } from '../models';
+import { ArticleItemResponse, ArticleResponse, MovementSummary } from '../models';
 
 export const ExerciseFeatureKey = 'Exercise';
+export const SummaryFeatureKey = 'Summary';
 export interface ExerciseState {
   [ExerciseFeatureKey]: ArticleResponse | null;
+  [SummaryFeatureKey]: MovementSummary | null;
 }
 
 export const exerciseInitialState: ExerciseState = {
   [ExerciseFeatureKey]: null,
+  [SummaryFeatureKey]: null,
 };
 
 const _ExerciseReducer = createReducer(
@@ -17,6 +20,11 @@ const _ExerciseReducer = createReducer(
   on(loadedExercise, (state, { Exercise }) => ({
     ...state,
     [ExerciseFeatureKey]: Exercise,
+  })),
+  on(loadedDashboard, (state, { movements, summary }) => ({
+    ...state,
+    [ExerciseFeatureKey]: movements,
+    [SummaryFeatureKey]: summary,
   }))
 );
 

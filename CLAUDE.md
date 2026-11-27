@@ -394,6 +394,9 @@ POSTGRES_HOST
 POSTGRES_HOST_EXTERNAL
 POSTGRES_PORT_EXTERNAL
 IMAGES_PATH
+RESEND_API_KEY   (optional — password reset emails)
+RESEND_FROM      (optional — e.g. "Finnance <no-reply@yourdomain>")
+FRONTEND_URL     (optional — used to build reset links)
 ```
 
 ---

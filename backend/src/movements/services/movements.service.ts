@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { Between, FindOptionsWhere, ILike, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
+import { escapeLike } from '../../core/util/escape-like';
 import { User } from '../../users/entities/user.entity';
 import { CreateMovementDto, UpdateMovementDto } from '../dtos/movement.dto';
 import { MovementsFilterDto } from '../dtos/movementFilter.dto';
@@ -27,11 +28,25 @@ export class MovementsService {
     }
     const { limit, offset } = params;
     if (params?.name) {
-      where.name = params.name;
+      where.name = ILike(`%${escapeLike(params.name)}%`);
     }
 
     if (params?.categoryId) {
       where.category = { id: params.categoryId };
+    }
+
+    if (params?.from && params?.to) {
+      where.date = Between(params.from, params.to);
+    } else if (params?.from) {
+      where.date = MoreThanOrEqual(params.from);
+    } else if (params?.to) {
+      where.date = LessThanOrEqual(params.to);
+    }
+
+    const income =
+      params?.income ?? (params?.type === 'income' ? true : params?.type === 'expense' ? false : undefined);
+    if (income !== undefined) {
+      where.income = income;
     }
 
     return this.productRepo.find({
@@ -41,6 +56,48 @@ export class MovementsService {
       where,
       order: { date: 'DESC' },
     });
+  }
+
+  public async getSummary(userId: number, from?: Date, to?: Date) {
+    const qb = this.productRepo
+      .createQueryBuilder('movement')
+      .leftJoin('movement.category', 'category')
+      .select('category.id', 'categoryId')
+      .addSelect('category.name', 'name')
+      .addSelect(`COALESCE(SUM(CASE WHEN movement.income THEN movement.quantity ELSE 0 END), 0)`, 'income')
+      .addSelect(`COALESCE(SUM(CASE WHEN movement.income THEN 0 ELSE movement.quantity END), 0)`, 'expense')
+      .where('movement.id_user = :userId', { userId })
+      .groupBy('category.id')
+      .addGroupBy('category.name');
+
+    if (from) {
+      qb.andWhere('movement.date >= :from', { from });
+    }
+    if (to) {
+      qb.andWhere('movement.date <= :to', { to });
+    }
+
+    const rows: Array<{ categoryId: number | null; name: string | null; income: string; expense: string }> =
+      await qb.getRawMany();
+
+    const byCategory = rows.map(row => ({
+      categoryId: row.categoryId ?? null,
+      name: row.name ?? 'Sin categoría',
+      income: Number(row.income) || 0,
+      expense: Number(row.expense) || 0,
+    }));
+
+    const income = byCategory.reduce((acc, row) => acc + row.income, 0);
+    const expense = byCategory.reduce((acc, row) => acc + row.expense, 0);
+
+    return {
+      from: from ?? null,
+      to: to ?? null,
+      income,
+      expense,
+      balance: income - expense,
+      byCategory,
+    };
   }
 
   public async findOne(idProduct: number, userId: number, whithRelations = true) {
@@ -59,8 +116,7 @@ export class MovementsService {
     const product = this.productRepo.create(payload);
     product.user = { id: userId } as User;
     if (payload.categoryId) {
-      const categories = await this.categoryService.findById(payload.categoryId);
-      product.category = categories;
+      product.category = await this.categoryService.assertUsableBy(payload.categoryId, userId);
     }
     return this.productRepo.save(product);
   }
@@ -68,8 +124,7 @@ export class MovementsService {
   public async update(id: number, payload: UpdateMovementDto, userId: number) {
     let product = await this.findOne(id, userId);
     if (payload?.categoryId) {
-      const categories = await this.categoryService.findById(payload.categoryId);
-      product.category = categories;
+      product.category = await this.categoryService.assertUsableBy(payload.categoryId, userId);
     }
     product = this.productRepo.merge(product, payload);
     return this.productRepo.save(product);

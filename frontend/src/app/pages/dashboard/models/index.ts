@@ -33,4 +33,30 @@ export interface CategoryResponse {
 export interface CategoryItemResponse {
   id: number;
   name: string;
+  isDefault?: boolean;
+}
+
+export interface SummaryCategoryItem {
+  categoryId: number | null;
+  name: string;
+  income: number;
+  expense: number;
+}
+
+export interface MovementSummary {
+  from: string | null;
+  to: string | null;
+  income: number;
+  expense: number;
+  balance: number;
+  byCategory: SummaryCategoryItem[];
+}
+
+export interface SummaryResponse {
+  summary: MovementSummary;
+}
+
+export interface CategoryCreatedResponse {
+  message: string;
+  product: CategoryItemResponse;
 }

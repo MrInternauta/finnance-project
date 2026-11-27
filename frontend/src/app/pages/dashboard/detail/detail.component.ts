@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 
 import { ISelectItem } from '../../../core/models/iselect.item';
@@ -30,6 +30,7 @@ export class DetailComponent implements OnDestroy, OnInit {
     private modalInfoService: ModalInfoService,
     private modalCtrl: ModalController,
     private pictureService: PictureService,
+    private alertController: AlertController,
     public router: Router,
   ) {
     this.getCategories();
@@ -76,17 +77,51 @@ export class DetailComponent implements OnDestroy, OnInit {
   }
 
   getCategories() {
-    this.productService.getCategories().subscribe(categoriesResponse => {
+    this.subscriptionCategories$?.unsubscribe();
+    this.subscriptionCategories$ = this.productService.getCategories().subscribe(categoriesResponse => {
       this.categories =
         categoriesResponse?.categories.map(item => {
           return {
             name: item.name,
             value: item.id.toString(),
             selected:
-              item.id?.toString()?.toLocaleLowerCase() === this.productService.product?.category?.id?.toString()?.toLocaleLowerCase(),
+              item.id?.toString()?.toLocaleLowerCase() === (this.categoryId || this.productService.product?.category?.id?.toString())?.toLocaleLowerCase(),
           };
         }) || [];
     });
+  }
+
+  async newCategory() {
+    const alert = await this.alertController.create({
+      header: 'Nueva categoría',
+      inputs: [{ name: 'name', type: 'text', placeholder: 'Nombre (mín. 3 letras)' }],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Crear',
+          handler: data => {
+            const name = (data?.name || '').trim();
+            if (name.length < 3) {
+              this.modalInfoService.warning('El nombre debe tener al menos 3 letras', '');
+              return false;
+            }
+            this.productService.postCategory(name).subscribe({
+              next: res => {
+                const newId = res?.product?.id;
+                this.categoryId = newId?.toString() || this.categoryId;
+                this.didSomeChange = true;
+                this.getCategories();
+              },
+              error: err => {
+                this.modalInfoService.error('No se pudo crear la categoría', err?.error?.message || '');
+              },
+            });
+            return true;
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 
   // public cancel() {

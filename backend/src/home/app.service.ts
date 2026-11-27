@@ -60,14 +60,14 @@ export class AppService {
       console.log(admin, cashier, client);
 
       const categories = this.categoriesServices.defaultValue();
-      categories.map(async item => {
-        await this.categoriesServices.create(item);
-      });
+      for (const item of categories) {
+        await this.categoriesServices.create(item, { userId: 1, isAdmin: true });
+      }
 
       const products = this.productsServices.defaultProducts();
-      products.map(async item => {
+      for (const item of products) {
         await this.productsServices.create(item, item.userId);
-      });
+      }
 
       return {
         message: 'Values set successfully!',

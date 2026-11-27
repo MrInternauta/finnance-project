@@ -11,6 +11,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true, //Remove not declared fields
       forbidNonWhitelisted: true, //Send a error with not declared fields
+      transform: true, //Convert primitives (query strings, params) to the declared types
       transformOptions: {
         enableImplicitConversion: true,
       },

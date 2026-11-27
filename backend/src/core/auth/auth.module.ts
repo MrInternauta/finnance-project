@@ -2,11 +2,14 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport/dist';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { config } from '../../config';
 import { UsersModule } from '../../users/users.module';
 import { AuthController } from './controllers/auth.controller';
+import { PasswordResetToken } from '../../users/entities/password-reset-token.entity';
 import { AuthService } from './services/auth.service';
+import { MailService } from './services/mail.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 
@@ -15,6 +18,7 @@ import { LocalStrategy } from './strategies/local.strategy';
   imports: [
     UsersModule,
     PassportModule,
+    TypeOrmModule.forFeature([PasswordResetToken]),
     JwtModule.registerAsync({
       inject: [config.KEY],
       useFactory: (configService: ConfigType<typeof config>) => ({
@@ -25,8 +29,8 @@ import { LocalStrategy } from './strategies/local.strategy';
       }),
     }),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
-  exports: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, MailService, LocalStrategy, JwtStrategy],
+  exports: [AuthService, MailService, LocalStrategy, JwtStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}

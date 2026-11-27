@@ -86,6 +86,11 @@ export class UsersService {
     return this.userRepo.save(user);
   }
 
+  async updatePassword(user: User, hashedPassword: string) {
+    user.password = hashedPassword;
+    return this.userRepo.save(user);
+  }
+
   async delete(id: number) {
     const user = await this.findOne(id);
     if (!user) {

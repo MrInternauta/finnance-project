@@ -24,7 +24,7 @@ import { Role } from '../../core/auth/models/roles.model';
 import { PayloadToken } from '../../core/auth/models/token.model';
 import { ParseIntPipe } from '../../core/pipes/parse-int.pipe';
 import { CreateMovementDto, UpdateMovementDto } from '../dtos/movement.dto';
-import { MovementsFilterDto } from '../dtos/movementFilter.dto';
+import { MovementsFilterDto, MovementsSummaryFilterDto } from '../dtos/movementFilter.dto';
 import { MovementsService } from '../services/movements.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -57,6 +57,17 @@ export class MovementsController {
   @HttpCode(HttpStatus.OK)
   async getmovements(@Query() params: MovementsFilterDto, @CurrentUser() user: PayloadToken) {
     return { movements: await this.movementsService.findAll(params, user.sub) };
+  }
+
+  @Get('summary')
+  @RoleD(Role.ADMIN, Role.CUSTOMER)
+  @ApiOperation({
+    summary: 'Movements summary',
+    description: 'Income/expense totals and per-category breakdown for the authenticated user',
+  })
+  @HttpCode(HttpStatus.OK)
+  async getSummary(@Query() params: MovementsSummaryFilterDto, @CurrentUser() user: PayloadToken) {
+    return { summary: await this.movementsService.getSummary(user.sub, params?.from, params?.to) };
   }
 
   //Getting obj params: Can use  Param() params: any and params.movementId

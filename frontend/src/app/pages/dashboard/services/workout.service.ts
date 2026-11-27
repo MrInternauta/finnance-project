@@ -3,7 +3,14 @@ import { Injectable } from '@angular/core';
 import { API_PREFIX } from 'src/app/core/constants';
 
 import { environment } from '../../../../environments/environment';
-import { ArticleCreate, ArticleItemResponse, ArticleResponse, CategoryResponse } from '../models';
+import {
+  ArticleCreate,
+  ArticleItemResponse,
+  ArticleResponse,
+  CategoryCreatedResponse,
+  CategoryResponse,
+  SummaryResponse,
+} from '../models';
 import { ProductsFilterDto } from '../models/productFilter.dto';
 
 const API_URL = `${environment.url}${API_PREFIX}movements`;
@@ -43,5 +50,21 @@ export class WorkoutService {
 
   deleteProduct(productId: string) {
     return this.http.delete<any | null>(`${API_URL}/${productId}`);
+  }
+
+  getSummary(params?: ProductsFilterDto) {
+    return this.http.get<SummaryResponse | null>(`${API_URL}/summary`, {
+      params: {
+        ...params,
+      },
+    });
+  }
+
+  postCategory(name: string) {
+    return this.http.post<CategoryCreatedResponse | null>(API_URL_CATEGORY, { name });
+  }
+
+  deleteCategory(categoryId: string | number) {
+    return this.http.delete<any | null>(`${API_URL_CATEGORY}/${categoryId}`);
   }
 }

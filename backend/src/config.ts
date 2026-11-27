@@ -18,6 +18,9 @@ export const configObj = {
   jwt_secret: process.env.JWT_SECRET,
   jwt_expires_in: process.env.JWT_EXPIRES_IN,
   IMAGES_PATH: process.env.IMAGES_PATH,
+  resend_api_key: process.env.RESEND_API_KEY,
+  resend_from: process.env.RESEND_FROM,
+  frontend_url: process.env.FRONTEND_URL,
 };
 export const config = registerAs('config', () => {
   return configObj;

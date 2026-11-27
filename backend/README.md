@@ -121,4 +121,9 @@ JWT_EXPIRES_IN=24h
 
 IMAGES_PATH=files/images
 
+# Optional — password reset emails via Resend
+RESEND_API_KEY=re_xxxxxxxxx
+RESEND_FROM=Finnance <no-reply@yourdomain>
+FRONTEND_URL=http://localhost:8100
+
 ```

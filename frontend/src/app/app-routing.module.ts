@@ -28,6 +28,10 @@ const routes: Routes = [
         path: 'forget-pass',
         loadChildren: () => import('./auth/pages/forget-pass/forget-pass.module').then(m => m.ForgetPassPageModule),
       },
+      {
+        path: 'reset-password',
+        loadChildren: () => import('./auth/pages/reset-password/reset-password.module').then(m => m.ResetPasswordPageModule),
+      },
     ],
   },
   {

@@ -67,6 +67,14 @@ export class AuthService {
     return this.http.post<UserCreatedResponse>(`${API_URL}users`, user);
   }
 
+  forgotPassword(email: string) {
+    return this.http.post<{ message: string }>(`${API_URL}auth/forgot`, { email });
+  }
+
+  resetPassword(token: string, password: string) {
+    return this.http.post<{ message: string }>(`${API_URL}auth/reset`, { token, password });
+  }
+
   getUserbyId() {
     return this.http.get<UserCreatedResponse>(`${API_URL}users`);
   }
