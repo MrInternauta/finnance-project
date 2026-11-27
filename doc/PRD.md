@@ -36,17 +36,17 @@ Android, and web.
 | ID   | Requirement                                                                 | Priority | Current state                                                                 |
 | ---- | --------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------- |
 | FR-1 | Sign up / login / logout with JWT                                           | P0       | Done                                                                          |
-| FR-2 | Authenticated user creates/edits/deletes **own** movements                  | P0       | **Broken**: create/update/delete are `@RoleD(Role.ADMIN)` only                 |
-| FR-3 | Movement list scoped to the authenticated user                              | P0       | **Broken**: `GET /movements` is `@Is_PublicD()` and returns all users' data    |
-| FR-4 | Owner taken from JWT, never from request body                               | P0       | **Broken**: `CreateMovementDto.userId` comes from client body                  |
-| FR-5 | Movements with the same name allowed (e.g. "Coffee" twice)                  | P0       | **Broken**: `validateUniqueName()` enforces global unique names                |
-| FR-6 | Filter by name, category, **date range**, income/expense                    | P1       | Partial (name exact-match, category)                                           |
-| FR-7 | Dashboard: totals, balance, per-category breakdown, period selector         | P1       | Partial (chart exists)                                                         |
+| FR-2 | Authenticated user creates/edits/deletes **own** movements | P0 | Done |
+| FR-3 | Movement list scoped to the authenticated user | P0 | Done |
+| FR-4 | Owner taken from JWT, never from request body | P0 | Done |
+| FR-5 | Movements with the same name allowed (e.g. "Coffee" twice) | P0 | Done |
+| FR-6 | Filter by name, category, **date range**, income/expense | P1 | Done |
+| FR-7 | Dashboard: totals, balance, per-category breakdown, period selector | P1 | Done |
 | FR-8 | Profile view/edit + avatar upload                                           | P1       | Done                                                                           |
-| FR-9 | Password recovery (request email → reset token → new password)              | P1       | Page only; no backend endpoint                                                 |
-| FR-10| Tab2: Reports / history view (replace "Products" placeholder)               | P2       | Not implemented                                                                |
-| FR-11| Budgets / goals per category (`METAS`, `AHORRO`)                            | P2       | Not started                                                                    |
-| FR-12| CSV export of movements                                                     | P2       | Not started                                                                    |
+| FR-9 | Password recovery (request email → reset token → new password) | P1 | Done |
+| FR-10 | Tab2: Reports / history view (replace "Products" placeholder) | P2 | Done |
+| FR-11 | Budgets / goals per category (`METAS`, `AHORRO`) | P2 | Done (budgets; goals deferred) |
+| FR-12 | CSV export of movements | P2 | Done (web download; native share deferred) |
 | FR-13| Admin: manage users, roles, categories                                      | P1       | Done (API)                                                                     |
 
 ## 5. Non-functional Requirements
@@ -78,8 +78,8 @@ Android, and web.
 
 | ID    | Requirement                                                                                                  | Priority | Current state                                                                                 |
 | ----- | ------------------------------------------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------- |
-| FR-14 | Sign-up always assigns the default `CLIENT` role server-side; `role` is ignored on public `POST /users`       | P0       | **Broken**: `UsersService.create()` accepts `role` from the request body (privilege escalation) |
-| FR-15 | Only super admin can change a user's role                                                                    | P0       | Partial (`PUT /users/:id` open to ADMIN + CUSTOMER, role field accepted)                       |
-| FR-16 | All amounts displayed as MXN                                                                                 | P1       | Not verified                                                                                  |
-| FR-17 | Password reset email sent through Resend; token hashed, single-use, expires in 30 min                        | P1       | Not started                                                                                   |
-| FR-18 | Category has nullable `userId`: `null` = global default, set = user-owned. Users list defaults + their own; CRUD only on their own | P1 | Not started (categories are admin-only, global) |
+| FR-14 | Sign-up always assigns the default `CLIENT` role server-side; `role` is ignored on public `POST /users` | P0 | Done |
+| FR-15 | Only super admin can change a user's role | P0 | Done |
+| FR-16 | All amounts displayed as MXN | P1 | Done |
+| FR-17 | Password reset email sent through Resend; token hashed, single-use, expires in 30 min | P1 | Done |
+| FR-18 | Category has nullable `userId`: `null` = global default, set = user-owned. Users list defaults + their own; CRUD only on their own | P1 | Done |

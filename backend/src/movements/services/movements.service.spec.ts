@@ -23,6 +23,7 @@ describe('MovementsService', () => {
       andWhere: jest.fn().mockReturnThis(),
       groupBy: jest.fn().mockReturnThis(),
       addGroupBy: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
       getRawMany: jest.fn(),
     };
     productRepo = {
@@ -186,5 +187,31 @@ describe('MovementsService', () => {
         withDeleted: true,
       })
     );
+  });
+
+  it('getMonthlySummary groups by month and coerces sums', async () => {
+    qb.getRawMany.mockResolvedValue([
+      { month: '2026-01-15', income: '1000.5', expense: '200' },
+      { month: new Date(2026, 1, 10, 12), income: '0', expense: '50.25' },
+    ]);
+
+    const months = await service.getMonthlySummary(7, new Date('2026-01-01'), new Date('2026-12-31'));
+
+    expect(months).toEqual([
+      { month: '2026-01', income: 1000.5, expense: 200, balance: 800.5 },
+      { month: '2026-02', income: 0, expense: 50.25, balance: -50.25 },
+    ]);
+    expect(qb.andWhere).toHaveBeenCalledTimes(2);
+  });
+
+  it('exportCsv scopes to the user and the date range', async () => {
+    productRepo.find.mockResolvedValue([]);
+
+    await service.exportCsv(7, new Date('2026-01-01'), new Date('2026-01-31'));
+
+    const arg = productRepo.find.mock.calls[0][0] as any;
+    expect(arg.where.user.id).toBe(7);
+    expect(arg.where.date).toBeDefined();
+    expect(arg.order).toEqual({ date: 'ASC' });
   });
 });

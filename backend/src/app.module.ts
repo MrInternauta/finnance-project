@@ -36,6 +36,7 @@ import { UsersModule } from './users/users.module';
         RESEND_API_KEY: Joi.string().optional(),
         RESEND_FROM: Joi.string().optional(),
         FRONTEND_URL: Joi.string().optional(),
+        CORS_ORIGINS: Joi.string().optional(),
       }),
     }),
     DatabaseModule,

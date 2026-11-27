@@ -24,6 +24,7 @@ import { Role } from '../../core/auth/models/roles.model';
 import { PayloadToken } from '../../core/auth/models/token.model';
 import { ParseIntPipe } from '../../core/pipes/parse-int.pipe';
 import { CreateMovementDto, UpdateMovementDto } from '../dtos/movement.dto';
+import { csvNumberCell, csvRow, csvTextCell } from '../../core/util/csv';
 import { MovementsFilterDto, MovementsSummaryFilterDto } from '../dtos/movementFilter.dto';
 import { MovementsService } from '../services/movements.service';
 
@@ -68,6 +69,50 @@ export class MovementsController {
   @HttpCode(HttpStatus.OK)
   async getSummary(@Query() params: MovementsSummaryFilterDto, @CurrentUser() user: PayloadToken) {
     return { summary: await this.movementsService.getSummary(user.sub, params?.from, params?.to) };
+  }
+
+  @Get('summary/monthly')
+  @RoleD(Role.ADMIN, Role.CUSTOMER)
+  @ApiOperation({
+    summary: 'Monthly movements summary',
+    description: 'Income/expense totals grouped by calendar month for the authenticated user',
+  })
+  @HttpCode(HttpStatus.OK)
+  async getMonthlySummary(@Query() params: MovementsSummaryFilterDto, @CurrentUser() user: PayloadToken) {
+    return { months: await this.movementsService.getMonthlySummary(user.sub, params?.from, params?.to) };
+  }
+
+  @Get('export')
+  @RoleD(Role.ADMIN, Role.CUSTOMER)
+  @ApiOperation({
+    summary: 'Export movements as CSV',
+    description: 'Downloads the authenticated user movements within the date range as a CSV file',
+  })
+  @HttpCode(HttpStatus.OK)
+  async exportCsv(@Res() res: Response, @Query() params: MovementsSummaryFilterDto, @CurrentUser() user: PayloadToken) {
+    const movements = await this.movementsService.exportCsv(user.sub, params?.from, params?.to);
+
+    const lines = [csvRow(['fecha', 'nombre', 'categoria', 'tipo', 'monto', 'descripcion'])];
+    for (const movement of movements) {
+      lines.push(
+        csvRow([
+          csvTextCell(movement.date.toISOString().slice(0, 10)),
+          csvTextCell(movement.name),
+          csvTextCell(movement.category?.name ?? 'Sin categoría'),
+          csvTextCell(movement.income ? 'ingreso' : 'gasto'),
+          csvNumberCell(movement.quantity),
+          csvTextCell(movement.description),
+        ])
+      );
+    }
+
+    const filename = `movimientos-${params?.from?.toISOString().slice(0, 10) ?? 'inicio'}-${
+      params?.to?.toISOString().slice(0, 10) ?? 'hoy'
+    }.csv`;
+    res
+      .setHeader('Content-Type', 'text/csv; charset=utf-8')
+      .setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+      .send('﻿' + lines.join('\r\n'));
   }
 
   //Getting obj params: Can use  Param() params: any and params.movementId

@@ -43,6 +43,7 @@ describe('Movements ownership (e2e)', () => {
   let tokenB: string;
   let movementId: number;
   let categoryAId: number;
+  let budgetId: number;
   const mailMock = { sendPasswordReset: jest.fn().mockResolvedValue(undefined) };
 
   beforeAll(async () => {
@@ -236,6 +237,98 @@ describe('Movements ownership (e2e)', () => {
     expect(resB.body.summary.expense).toBe(0);
   });
 
+  it('monthly summary groups the user movements by month', async () => {
+    const res = await request(server)
+      .get('/api/movements/summary/monthly')
+      .set('Authorization', `Bearer ${tokenA}`)
+      .expect(200);
+
+    const months = res.body.months;
+    expect(months.length).toBe(1);
+    const month = months[0];
+    expect(month.month).toMatch(/^\d{4}-\d{2}$/);
+    expect(month.income).toBe(1000);
+    expect(month.expense).toBe(300);
+    expect(month.balance).toBe(700);
+
+    const resB = await request(server)
+      .get('/api/movements/summary/monthly')
+      .set('Authorization', `Bearer ${tokenB}`)
+      .expect(200);
+    expect(resB.body.months).toHaveLength(0);
+  });
+
+  it('budgets: create, spend tracking, duplicate rejection and ownership', async () => {
+    const res = await request(server)
+      .post('/api/budgets')
+      .set('Authorization', `Bearer ${tokenA}`)
+      .send({ categoryId: categoryAId, amount: 300 })
+      .expect(200);
+    budgetId = res.body.budget.id;
+    expect(budgetId).toBeTruthy();
+
+    // one active budget per (user, category)
+    await request(server)
+      .post('/api/budgets')
+      .set('Authorization', `Bearer ${tokenA}`)
+      .send({ categoryId: categoryAId, amount: 100 })
+      .expect(400);
+
+    // category must be usable by the requester
+    await request(server)
+      .post('/api/budgets')
+      .set('Authorization', `Bearer ${tokenB}`)
+      .send({ categoryId: categoryAId, amount: 100 })
+      .expect(400);
+
+    // spent = user A expenses in that category (Cena 250)
+    const list = await request(server).get('/api/budgets').set('Authorization', `Bearer ${tokenA}`).expect(200);
+    const budget = list.body.budgets.find((b: any) => b.id === budgetId);
+    expect(budget.category).toEqual({ id: categoryAId, name: 'CategoriaDeA' });
+    expect(budget.amount).toBe(300);
+    expect(budget.spent).toBe(250);
+    expect(budget.remaining).toBe(50);
+
+    // user B cannot see, update or delete user A budget
+    const listB = await request(server).get('/api/budgets').set('Authorization', `Bearer ${tokenB}`).expect(200);
+    expect((listB.body.budgets || []).map((b: any) => b.id)).not.toContain(budgetId);
+    await request(server)
+      .put(`/api/budgets/${budgetId}`)
+      .set('Authorization', `Bearer ${tokenB}`)
+      .send({ amount: 1 })
+      .expect(404);
+    await request(server).delete(`/api/budgets/${budgetId}`).set('Authorization', `Bearer ${tokenB}`).expect(404);
+
+    // owner can update and delete
+    await request(server)
+      .put(`/api/budgets/${budgetId}`)
+      .set('Authorization', `Bearer ${tokenA}`)
+      .send({ amount: 400 })
+      .expect(200);
+    await request(server).delete(`/api/budgets/${budgetId}`).set('Authorization', `Bearer ${tokenA}`).expect(200);
+  });
+
+  it('export returns a scoped CSV with headers and sanitized cells', async () => {
+    const res = await request(server).get('/api/movements/export').set('Authorization', `Bearer ${tokenA}`).expect(200);
+
+    expect(res.headers['content-type']).toContain('text/csv');
+    expect(res.headers['content-disposition']).toContain('attachment');
+    expect(res.headers['content-disposition']).toContain('movimientos-');
+    expect(res.text.charCodeAt(0)).toBe(0xfeff); // UTF-8 BOM
+    const lines = res.text.split('\r\n');
+    expect(lines[0]).toContain('fecha,nombre,categoria,tipo,monto,descripcion');
+    expect(res.text).toContain(',Sueldo,');
+    expect(res.text).toContain('ingreso');
+    expect(res.text).toContain('gasto');
+
+    // user B gets an empty export
+    const resB = await request(server)
+      .get('/api/movements/export')
+      .set('Authorization', `Bearer ${tokenB}`)
+      .expect(200);
+    expect(resB.text.split('\r\n')).toHaveLength(1); // BOM + header line only
+  });
+
   it('forgot always answers 200 and only emails when the user exists', async () => {
     const before = mailMock.sendPasswordReset.mock.calls.length;
     const res = await request(server)
@@ -293,5 +386,18 @@ describe('Movements ownership (e2e)', () => {
 
     // token is single-use
     await request(server).post('/api/auth/reset').send({ token: rawToken, password: 'another1' }).expect(400);
+  });
+
+  // Runs last on purpose: the suite already spent 4 of the 5 allowed /auth calls,
+  // so the next login is the 5th (allowed) and the one after is throttled.
+  it('rate limits the auth endpoints (6th request in a minute -> 429)', async () => {
+    const res = await request(server)
+      .post('/api/auth')
+      .send({ email: 'nobody@nowhere.com', password: 'nope' })
+      .expect(401);
+    expect(res.status).toBe(401);
+
+    await request(server).post('/api/auth').send({ email: 'nobody@nowhere.com', password: 'nope' }).expect(429);
+    await request(server).post('/api/auth').send({ email: 'nobody@nowhere.com', password: 'nope' }).expect(429);
   });
 });

@@ -17,6 +17,12 @@ const routes: Routes = [
       {
         canActivate: [RoleGuardGuard],
         data: { roles: ['ADMIN', 'CLIENT_PRO', 'CLIENT'] },
+        path: 'tab2',
+        loadChildren: () => import('./products/tab2.module').then(m => m.Tab2PageModule),
+      },
+      {
+        canActivate: [RoleGuardGuard],
+        data: { roles: ['ADMIN', 'CLIENT_PRO', 'CLIENT'] },
         path: 'tab3',
         loadChildren: () => import('./profile/tab3.module').then(m => m.Tab3PageModule),
       },
@@ -29,7 +35,7 @@ const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: '/tabs/tab2',
+    redirectTo: '/tabs/tab1',
     pathMatch: 'full',
   },
 ];

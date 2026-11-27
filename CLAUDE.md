@@ -57,6 +57,9 @@ src/
 │   │   ├── data-source.ts      CLI DataSource for migration commands
 │   │   └── migrations/         1735627479683 — initial schema
 │   │                           1747982567572 — user.image nullable
+│   │                           1795814625128 — drop movement unique index
+│   │                           1795815327280 — category.id_user, password_reset_token
+│   │                           1795816652908 — budget table
 │   ├── interfaces/
 │   │   ├── basic.entity.ts     Base class: createdAt, updatedAt, deletedAt (soft-delete)
 │   │   ├── filter.dto.ts       Shared pagination DTO (page, limit)
@@ -70,10 +73,13 @@ src/
 │   └── controllers/            users.controller.ts, rols.controller.ts, profile.controller.ts
 │
 └── movements/
-    ├── entities/               movement.entity.ts (named "Product" in code), category.entity.ts
-    ├── dtos/                   movement.dto.ts, category.dto.ts, movementFilter.dto.ts
-    ├── services/               movements.service.ts, categories.service.ts
-    └── controllers/            movements.controller.ts, categories.controller.ts
+    ├── entities/               movement.entity.ts (named "Product" in code), category.entity.ts,
+    │                           budget.entity.ts
+    ├── dtos/                   movement.dto.ts, category.dto.ts, movementFilter.dto.ts,
+    │                           budget.dto.ts
+    ├── services/               movements.service.ts, categories.service.ts, budgets.service.ts
+    └── controllers/            movements.controller.ts, categories.controller.ts,
+                                budgets.controller.ts
 ```
 
 ### Data Model
@@ -85,12 +91,16 @@ Role ◄────────────── Permission
 User ──► Role
  │
  └──► Movement  (entity file: movement.entity.ts, named "Product" in code)
-         ├── name, date, quantity (real), description
-         ├── income: boolean  (true = income / false = expense)
-         └──► Category
-                └── SUELDO | INVERSIONES | ALOJAMIENTO | ENTRETENIMIENTO
-                    TRANSPORTE | GTS_PERSONALES | SEGUROS | CREDITO | COMIDA
-                    AHORRO | APRENDIZAJE | REGALOS | CUIDADO_PERSONAL | METAS | OTROS
+ │        ├── name, date, quantity (real), description
+ │        ├── income: boolean  (true = income / false = expense)
+ │        └──► Category  (nullable user FK: null = global default, set = user-owned)
+ │               └── SUELDO | INVERSIONES | ALOJAMIENTO | ENTRETENIMIENTO
+ │                   TRANSPORTE | GTS_PERSONALES | SEGUROS | CREDITO | COMIDA
+ │                   AHORRO | APRENDIZAJE | REGALOS | CUIDADO_PERSONAL | METAS | OTROS
+ │
+ ├──► Category  (user-defined categories, FR-18)
+ ├──► Budget    (one active per user+category)
+ └──► PasswordResetToken  (sha256 hash, 30-min expiry, single-use)
 ```
 
 - All entities extend `BasicEntity` → soft-delete via `deletedAt`, never hard-deleted
@@ -104,29 +114,38 @@ All routes prefixed with `/api`. Auth column: Public / JWT / ADMIN / CUSTOMER.
 
 | Method | Route                     | Auth           | Description                               |
 | ------ | ------------------------- | -------------- | ----------------------------------------- |
-| POST   | `/auth`                   | Public         | Login → `{ access_token, user }`          |
+| POST   | `/auth`                   | Public, 5/min  | Login → `{ access_token, user }`          |
+| POST   | `/auth/forgot`            | Public, 5/min  | Request password reset email              |
+| POST   | `/auth/reset`             | Public, 5/min  | Reset password with token                 |
 | GET    | `/users`                  | ADMIN          | List users (paginated)                    |
-| GET    | `/users/:id`              | Public         | Get user by ID                            |
-| POST   | `/users`                  | Public         | Create user (sign up)                     |
-| PUT    | `/users/:id`              | ADMIN/CUSTOMER | Update user                               |
+| GET    | `/users/:id`              | ADMIN or self  | Get user by ID                            |
+| POST   | `/users`                  | Public         | Create user (sign up; role always CLIENT) |
+| PUT    | `/users/:id`              | ADMIN/CUSTOMER | Update user (self unless ADMIN; role only by ADMIN) |
 | DELETE | `/users/:id`              | ADMIN          | Soft-delete user                          |
 | GET    | `/profile/my-orders`      | CUSTOMER       | Authenticated user's movements            |
 | GET    | `/roles`                  | ADMIN          | List roles                                |
 | POST   | `/roles`                  | ADMIN          | Create role                               |
 | PUT    | `/roles/:id`              | ADMIN          | Update role                               |
 | DELETE | `/roles/:id`              | ADMIN          | Soft-delete role                          |
-| GET    | `/movements`              | Public         | List movements (filter: name, categoryId) |
-| GET    | `/movements/:id`          | Public         | Get movement by ID                        |
-| POST   | `/movements`              | ADMIN          | Create movement                           |
-| PUT    | `/movements/:id`          | ADMIN          | Update movement                           |
-| PUT    | `/movements/:id/restore`  | ADMIN          | Restore soft-deleted movement             |
-| DELETE | `/movements/:id`          | ADMIN          | Soft-delete movement                      |
-| GET    | `/categories`             | Public         | List categories                           |
-| GET    | `/categories/:id`         | Public         | Get category by ID                        |
-| POST   | `/categories`             | ADMIN          | Create category                           |
-| PUT    | `/categories/:id`         | ADMIN          | Update category                           |
-| PUT    | `/categories/:id/restore` | ADMIN          | Restore soft-deleted category             |
-| DELETE | `/categories/:id`         | ADMIN          | Soft-delete category                      |
+| GET    | `/movements`              | ADMIN/CUSTOMER | Own movements (filter: name, categoryId, from, to, income) |
+| GET    | `/movements/summary`      | ADMIN/CUSTOMER | Totals + per-category for `from`/`to`     |
+| GET    | `/movements/summary/monthly` | ADMIN/CUSTOMER | Totals grouped by month                |
+| GET    | `/movements/export`       | ADMIN/CUSTOMER | CSV download of own movements             |
+| GET    | `/movements/:id`          | ADMIN/CUSTOMER | Get own movement by ID                    |
+| POST   | `/movements`              | ADMIN/CUSTOMER | Create movement                           |
+| PUT    | `/movements/:id`          | ADMIN/CUSTOMER | Update own movement                       |
+| PUT    | `/movements/:id/restore`  | ADMIN/CUSTOMER | Restore own soft-deleted movement         |
+| DELETE | `/movements/:id`          | ADMIN/CUSTOMER | Soft-delete own movement                  |
+| GET    | `/categories`             | ADMIN/CUSTOMER | Defaults + own categories (unpaginated)   |
+| GET    | `/categories/:id`         | ADMIN/CUSTOMER | Get default/own category by ID            |
+| POST   | `/categories`             | ADMIN/CUSTOMER | Create category (ADMIN → global; CLIENT → own) |
+| PUT    | `/categories/:id`         | ADMIN/CUSTOMER | Update (ADMIN: defaults+own; CLIENT: own) |
+| PUT    | `/categories/:id/restore` | ADMIN/CUSTOMER | Restore (same ownership rules)            |
+| DELETE | `/categories/:id`         | ADMIN/CUSTOMER | Soft-delete (same ownership rules)        |
+| GET    | `/budgets`                | ADMIN/CUSTOMER | Own budgets + spent/remaining for `from`/`to` |
+| POST   | `/budgets`                | ADMIN/CUSTOMER | Create budget {categoryId, amount}        |
+| PUT    | `/budgets/:id`            | ADMIN/CUSTOMER | Update own budget amount                  |
+| DELETE | `/budgets/:id`            | ADMIN/CUSTOMER | Soft-delete own budget                    |
 | GET    | `/setDefaultValues`       | API Key        | Seed DB with defaults                     |
 | POST   | `/image/:type/:id`        | ADMIN          | Upload image (jpg/png ≤ 2MB)              |
 | GET    | `/image/:type/:img`       | ADMIN/CUSTOMER | Retrieve stored image                     |
@@ -181,7 +200,7 @@ src/
     │
     ├── auth/
     │   ├── model/              user.dto, role.dto, Auth.ts (AuthSuccess shape)
-    │   ├── pages/              login/, sign-up-1/, forget-pass/
+    │   ├── pages/              login/, sign-up-1/, forget-pass/, reset-password/
     │   ├── services/           auth.service.ts — login, logout, hasSession, loadStorage
     │   └── state/              auth.actions, auth.state (IAuthState), permissions.effects
     │
@@ -192,10 +211,10 @@ src/
         │   ├── models/         order.model, category.dto, productFilter.dto, order.filter.dto
         │   ├── services/       workout.service (movements CRUD + categories), order.service
         │   └── state/          workout.actions, workout.effects, workout.selector, workout.state
-        ├── profile/            Tab3 — profile view/edit + avatar upload
+        ├── profile/            Tab3 — profile view/edit + avatar upload + "Mis categorías"
         │   ├── models/         user-updated.ts
         │   └── services/       profile.service.ts (users CRUD)
-        ├── products/           Tab2 — placeholder, NOT IMPLEMENTED
+        ├── products/           Tab2 — "Reportes": monthly bar chart, budgets, CSV export
         └── error-page/         404 page
 ```
 
@@ -228,6 +247,10 @@ Tab1 (Dashboard) → GET /api/movements + GET /api/categories
 
 Tab3 (Profile)  → display user info → edit → PUT /api/users/:id
                → camera → compress (quality 60, max 500×500) → POST /api/image/user/:id
+               → "Mis categorías" → GET/DELETE /api/categories
+
+Tab2 (Reportes) → GET /api/movements/summary/monthly + GET /api/budgets + GET /api/categories
+               → bar chart income vs expense → "Exportar CSV" → GET /api/movements/export
 
 Logout → clear localStorage → dispatch unUser → /authentication/login-1
 ```
@@ -243,8 +266,8 @@ Frontend ──[HTTP + Bearer JWT]──► Backend ──[TypeORM]──► Pos
 
 | Service          | Hits                                                |
 | ---------------- | --------------------------------------------------- |
-| `AuthService`    | `POST /auth`, `POST /users`, `GET /users`           |
-| `WorkoutService` | `GET/POST/PUT/DELETE /movements`, `GET /categories` |
+| `AuthService`    | `POST /auth`, `POST /auth/forgot`, `POST /auth/reset`, `POST /users`, `GET /users` |
+| `WorkoutService` | `GET/POST/PUT/DELETE /movements`, `/movements/summary(+monthly)`, `/movements/export`, `/categories`, `/budgets` |
 | `OrderService`   | `GET /movements`                                    |
 | `ProfileService` | `GET/POST/PUT/DELETE /users`                        |
 | `FileService`    | `POST /image/:type/:id`                             |
@@ -255,15 +278,19 @@ Frontend ──[HTTP + Bearer JWT]──► Backend ──[TypeORM]──► Pos
 | ------------------------------------- | -------------------------------------- |
 | Login / Logout                        | Done                                   |
 | Sign up                               | Done                                   |
-| Dashboard with income/expense chart   | Done                                   |
+| Dashboard with income/expense chart   | Done (+ period selector, summary cards, doughnut) |
 | Create / edit / delete movements      | Done                                   |
-| Filter movements by name and category | Done                                   |
+| Filter movements by name, category, date range, income/expense | Done          |
 | View and edit user profile            | Done                                   |
 | Upload avatar (camera or gallery)     | Done                                   |
 | Offline detection alert               | Done                                   |
-| Role-based access control             | Done (Tab1 role guard commented out)   |
-| Products tab (Tab2)                   | Not implemented                        |
-| Password recovery                     | Page exists, backend logic unconfirmed |
+| Role-based access control             | Done                                   |
+| Reports tab (Tab2): monthly bar chart + totals | Done                     |
+| Budgets per category                  | Done (in Reports tab)                  |
+| CSV export                            | Done (browser download)                |
+| User-defined categories               | Done (profile "Mis categorías")        |
+| Password recovery                     | Done (Resend email → reset-password page) |
+| MXN currency / es-MX locale           | Done                                   |
 
 ---
 
@@ -272,10 +299,6 @@ Frontend ──[HTTP + Bearer JWT]──► Backend ──[TypeORM]──► Pos
 - **PRD / requirements:** [`doc/PRD.md`](doc/PRD.md)
 - **Roadmap & next steps:** [`doc/PLAN.md`](doc/PLAN.md)
 - **DeepWiki:** https://deepwiki.com/MrInternauta/finnance-project (not indexed yet)
-
-Known P0 gaps (details in PRD): movements are not scoped per user (`GET /movements` is public,
-`userId` comes from the request body), only ADMIN can create movements, and movement names are
-forced globally unique, and sign-up accepts `role` from the request body.
 
 Product decisions (PRD §7): roles = super admin (`ADMIN`) + default user (`CLIENT`, auto-assigned
 at sign-up); currency **MXN only**; password reset email via **Resend**; categories = global
@@ -370,9 +393,12 @@ docker-compose up -d                     # retry
 - **Data source config:** `backend/src/core/database/data-source.ts`
 
 | Migration                    | Change                      |
-| ---------------------------- | --------------------------- |
-| `1735627479683-migration.ts` | Initial schema — all tables |
-| `1747982567572-migration.ts` | `user.image` → nullable     |
+| ---------------------------- | ---------------------------------------------------- |
+| `1735627479683-migration.ts` | Initial schema — all tables                          |
+| `1747982567572-migration.ts` | `user.image` → nullable                              |
+| `1795814625128-migration.ts` | Drop movement unique index (name,date,category,income) |
+| `1795815327280-migration.ts` | `category.id_user` FK + `password_reset_token` table |
+| `1795816652908-migration.ts` | `budget` table (user + category FKs)                 |
 
 ```bash
 # Migration commands (run from backend/)
@@ -397,6 +423,8 @@ IMAGES_PATH
 RESEND_API_KEY   (optional — password reset emails)
 RESEND_FROM      (optional — e.g. "Finnance <no-reply@yourdomain>")
 FRONTEND_URL     (optional — used to build reset links)
+CORS_ORIGINS     (optional — comma-separated origin allowlist; Capacitor needs
+                  `capacitor://localhost` and `http://localhost`)
 ```
 
 ---
@@ -410,4 +438,4 @@ FRONTEND_URL     (optional — used to build reset links)
 - **Frontend path alias is `@gymTrack/*`** — leftover name, don't rename without updating `tsconfig.json`.
 - **API base URL is hardcoded** in `frontend/src/environments/environment.ts` — must be updated per environment before building for staging/production.
 - **No queues, no cron jobs, no external payment/notification services** — the backend is fully synchronous.
-- **Tab2 (Products page) is a placeholder** — do not assume it has working logic.
+- **Tab2 is "Reportes"** — the `pages/products/` folder name is kept (renaming would churn paths) but it renders the reports view: monthly chart, budgets, CSV export.

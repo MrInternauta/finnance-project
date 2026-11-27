@@ -21,6 +21,7 @@ export const configObj = {
   resend_api_key: process.env.RESEND_API_KEY,
   resend_from: process.env.RESEND_FROM,
   frontend_url: process.env.FRONTEND_URL,
+  cors_origins: process.env.CORS_ORIGINS,
 };
 export const config = registerAs('config', () => {
   return configObj;

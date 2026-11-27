@@ -1,6 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
 import { UseGuards } from '@nestjs/common/decorators';
 import { AuthGuard } from '@nestjs/passport';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { ApiTags } from '@nestjs/swagger';
 
 import { Request } from 'express';
@@ -11,6 +12,7 @@ import { ForgotPasswordDto, ResetPasswordDto } from '../dtos/password-reset.dto'
 import { AuthService } from '../services/auth.service';
 
 @ApiTags('auth')
+@UseGuards(ThrottlerGuard) // 5 req / 60 s per IP — login + password reset only, not the rest of the API
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}

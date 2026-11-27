@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  API_KEY: ci-api-key
+  JWT_SECRET: ci-jwt-secret
+  JWT_EXPIRES_IN: 1h
+  IMAGES_PATH: ./uploads
+  POSTGRES_DB: finnance_test
+  POSTGRES_USER: finnance
+  POSTGRES_PASSWORD: finnance
+  POSTGRES_HOST: localhost
+  POSTGRES_PORT: 5432
+  POSTGRES_HOST_EXTERNAL: localhost
+  POSTGRES_PORT_EXTERNAL: 5432
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: finnance
+          POSTGRES_PASSWORD: finnance
+          POSTGRES_DB: finnance_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U finnance -d finnance_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Build
+        working-directory: backend
+        run: npm run build
+
+      - name: Unit tests
+        working-directory: backend
+        run: npx jest
+
+      - name: Run migrations
+        working-directory: backend
+        run: npm run migrations:run
+
+      - name: e2e tests
+        working-directory: backend
+        run: npm run test:e2e
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.9.0'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build (production)
+        working-directory: frontend
+        run: npx ng build

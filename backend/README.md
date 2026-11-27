@@ -126,4 +126,8 @@ RESEND_API_KEY=re_xxxxxxxxx
 RESEND_FROM=Finnance <no-reply@yourdomain>
 FRONTEND_URL=http://localhost:8100
 
+# Optional — CORS allowlist (comma-separated; unset = permissive)
+# Capacitor apps need capacitor://localhost and http://localhost
+CORS_ORIGINS=capacitor://localhost,http://localhost
+
 ```

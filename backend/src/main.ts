@@ -28,10 +28,17 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
-  app.enableCors();
-  // {
-  //   origin: ['localhost'],
-  // }
+
+  // CORS_ORIGINS (comma-separated) restricts allowed origins; unset keeps the permissive default.
+  // Capacitor builds need `capacitor://localhost` and `http://localhost` in the list.
+  const corsOrigins = process.env.CORS_ORIGINS?.split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean);
+  if (corsOrigins?.length) {
+    app.enableCors({ origin: corsOrigins });
+  } else {
+    app.enableCors();
+  }
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();

@@ -100,6 +100,54 @@ export class MovementsService {
     };
   }
 
+  public async getMonthlySummary(userId: number, from?: Date, to?: Date) {
+    const qb = this.productRepo
+      .createQueryBuilder('movement')
+      .select(`date_trunc('month', movement.date)`, 'month')
+      .addSelect(`COALESCE(SUM(CASE WHEN movement.income THEN movement.quantity ELSE 0 END), 0)`, 'income')
+      .addSelect(`COALESCE(SUM(CASE WHEN movement.income THEN 0 ELSE movement.quantity END), 0)`, 'expense')
+      .where('movement.id_user = :userId', { userId })
+      .groupBy(`date_trunc('month', movement.date)`)
+      .orderBy(`date_trunc('month', movement.date)`, 'ASC');
+
+    if (from) {
+      qb.andWhere('movement.date >= :from', { from });
+    }
+    if (to) {
+      qb.andWhere('movement.date <= :to', { to });
+    }
+
+    const rows: Array<{ month: Date | string; income: string; expense: string }> = await qb.getRawMany();
+
+    return rows.map(row => {
+      const month = row.month instanceof Date ? row.month : new Date(row.month);
+      const income = Number(row.income) || 0;
+      const expense = Number(row.expense) || 0;
+      return {
+        month: `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}`,
+        income,
+        expense,
+        balance: income - expense,
+      };
+    });
+  }
+
+  public async exportCsv(userId: number, from?: Date, to?: Date) {
+    const where: FindOptionsWhere<Product> = { user: { id: userId } };
+    if (from && to) {
+      where.date = Between(from, to);
+    } else if (from) {
+      where.date = MoreThanOrEqual(from);
+    } else if (to) {
+      where.date = LessThanOrEqual(to);
+    }
+    return this.productRepo.find({
+      relations: ['category'],
+      where,
+      order: { date: 'ASC' },
+    });
+  }
+
   public async findOne(idProduct: number, userId: number, whithRelations = true) {
     const product = await this.productRepo.findOne({
       relations: whithRelations ? ['category'] : [],

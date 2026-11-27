@@ -60,3 +60,26 @@ export interface CategoryCreatedResponse {
   message: string;
   product: CategoryItemResponse;
 }
+
+export interface MonthSummary {
+  month: string;
+  income: number;
+  expense: number;
+  balance: number;
+}
+
+export interface MonthsResponse {
+  months: MonthSummary[];
+}
+
+export interface BudgetItem {
+  id: number;
+  category: { id: number; name: string } | null;
+  amount: number;
+  spent: number;
+  remaining: number;
+}
+
+export interface BudgetsResponse {
+  budgets: BudgetItem[];
+}
