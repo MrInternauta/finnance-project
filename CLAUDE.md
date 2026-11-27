@@ -1,6 +1,6 @@
-# Finnance — Mini POS
+# Finnance — finnance-project
 
-Personal finance tracking and Point of Sale mobile app. Users register income/expenses by category, manage their profile, and are controlled via role-based access. Runs on iOS, Android, and web.
+Personal finnance tracking mobile app. Users register income/expenses by category, manage their profile, and are controlled via role-based access. Runs on iOS, Android, and web.
 
 ---
 
@@ -102,35 +102,35 @@ User ──► Role
 
 All routes prefixed with `/api`. Auth column: Public / JWT / ADMIN / CUSTOMER.
 
-| Method | Route | Auth | Description |
-|---|---|---|---|
-| POST | `/auth` | Public | Login → `{ access_token, user }` |
-| GET | `/users` | ADMIN | List users (paginated) |
-| GET | `/users/:id` | Public | Get user by ID |
-| POST | `/users` | Public | Create user (sign up) |
-| PUT | `/users/:id` | ADMIN/CUSTOMER | Update user |
-| DELETE | `/users/:id` | ADMIN | Soft-delete user |
-| GET | `/profile/my-orders` | CUSTOMER | Authenticated user's movements |
-| GET | `/roles` | ADMIN | List roles |
-| POST | `/roles` | ADMIN | Create role |
-| PUT | `/roles/:id` | ADMIN | Update role |
-| DELETE | `/roles/:id` | ADMIN | Soft-delete role |
-| GET | `/movements` | Public | List movements (filter: name, categoryId) |
-| GET | `/movements/:id` | Public | Get movement by ID |
-| POST | `/movements` | ADMIN | Create movement |
-| PUT | `/movements/:id` | ADMIN | Update movement |
-| PUT | `/movements/:id/restore` | ADMIN | Restore soft-deleted movement |
-| DELETE | `/movements/:id` | ADMIN | Soft-delete movement |
-| GET | `/categories` | Public | List categories |
-| GET | `/categories/:id` | Public | Get category by ID |
-| POST | `/categories` | ADMIN | Create category |
-| PUT | `/categories/:id` | ADMIN | Update category |
-| PUT | `/categories/:id/restore` | ADMIN | Restore soft-deleted category |
-| DELETE | `/categories/:id` | ADMIN | Soft-delete category |
-| GET | `/setDefaultValues` | API Key | Seed DB with defaults |
-| POST | `/image/:type/:id` | ADMIN | Upload image (jpg/png ≤ 2MB) |
-| GET | `/image/:type/:img` | ADMIN/CUSTOMER | Retrieve stored image |
-| GET | `/docs` | Public | Swagger UI |
+| Method | Route                     | Auth           | Description                               |
+| ------ | ------------------------- | -------------- | ----------------------------------------- |
+| POST   | `/auth`                   | Public         | Login → `{ access_token, user }`          |
+| GET    | `/users`                  | ADMIN          | List users (paginated)                    |
+| GET    | `/users/:id`              | Public         | Get user by ID                            |
+| POST   | `/users`                  | Public         | Create user (sign up)                     |
+| PUT    | `/users/:id`              | ADMIN/CUSTOMER | Update user                               |
+| DELETE | `/users/:id`              | ADMIN          | Soft-delete user                          |
+| GET    | `/profile/my-orders`      | CUSTOMER       | Authenticated user's movements            |
+| GET    | `/roles`                  | ADMIN          | List roles                                |
+| POST   | `/roles`                  | ADMIN          | Create role                               |
+| PUT    | `/roles/:id`              | ADMIN          | Update role                               |
+| DELETE | `/roles/:id`              | ADMIN          | Soft-delete role                          |
+| GET    | `/movements`              | Public         | List movements (filter: name, categoryId) |
+| GET    | `/movements/:id`          | Public         | Get movement by ID                        |
+| POST   | `/movements`              | ADMIN          | Create movement                           |
+| PUT    | `/movements/:id`          | ADMIN          | Update movement                           |
+| PUT    | `/movements/:id/restore`  | ADMIN          | Restore soft-deleted movement             |
+| DELETE | `/movements/:id`          | ADMIN          | Soft-delete movement                      |
+| GET    | `/categories`             | Public         | List categories                           |
+| GET    | `/categories/:id`         | Public         | Get category by ID                        |
+| POST   | `/categories`             | ADMIN          | Create category                           |
+| PUT    | `/categories/:id`         | ADMIN          | Update category                           |
+| PUT    | `/categories/:id/restore` | ADMIN          | Restore soft-deleted category             |
+| DELETE | `/categories/:id`         | ADMIN          | Soft-delete category                      |
+| GET    | `/setDefaultValues`       | API Key        | Seed DB with defaults                     |
+| POST   | `/image/:type/:id`        | ADMIN          | Upload image (jpg/png ≤ 2MB)              |
+| GET    | `/image/:type/:img`       | ADMIN/CUSTOMER | Retrieve stored image                     |
+| GET    | `/docs`                   | Public         | Swagger UI                                |
 
 ---
 
@@ -210,7 +210,7 @@ Angular 18 → Ionic 8 → Capacitor 6
                             └── @capacitor/app         app lifecycle events
 ```
 
-App ID: `mx.ramirex.minipos` | Name: `Mini POS` | Targets: iOS, Android, Web
+App ID: `mx.ramirex.finnance-project` | Name: `finnance-project` | Targets: iOS, Android, Web
 
 ### App Flow
 
@@ -241,29 +241,45 @@ Frontend ──[HTTP + Bearer JWT]──► Backend ──[TypeORM]──► Pos
 - **AuthInterceptor:** adds `Authorization: Bearer <token>`, 30s timeout, auto-logout on 401
 - **API base URL:** `environment.ts` → update per environment before building
 
-| Service | Hits |
-|---|---|
-| `AuthService` | `POST /auth`, `POST /users`, `GET /users` |
+| Service          | Hits                                                |
+| ---------------- | --------------------------------------------------- |
+| `AuthService`    | `POST /auth`, `POST /users`, `GET /users`           |
 | `WorkoutService` | `GET/POST/PUT/DELETE /movements`, `GET /categories` |
-| `OrderService` | `GET /movements` |
-| `ProfileService` | `GET/POST/PUT/DELETE /users` |
-| `FileService` | `POST /image/:type/:id` |
+| `OrderService`   | `GET /movements`                                    |
+| `ProfileService` | `GET/POST/PUT/DELETE /users`                        |
+| `FileService`    | `POST /image/:type/:id`                             |
 
 ### Functionalities
 
-| Feature | Status |
-|---|---|
-| Login / Logout | Done |
-| Sign up | Done |
-| Dashboard with income/expense chart | Done |
-| Create / edit / delete movements | Done |
-| Filter movements by name and category | Done |
-| View and edit user profile | Done |
-| Upload avatar (camera or gallery) | Done |
-| Offline detection alert | Done |
-| Role-based access control | Done (Tab1 role guard commented out) |
-| Products tab (Tab2) | Not implemented |
-| Password recovery | Page exists, backend logic unconfirmed |
+| Feature                               | Status                                 |
+| ------------------------------------- | -------------------------------------- |
+| Login / Logout                        | Done                                   |
+| Sign up                               | Done                                   |
+| Dashboard with income/expense chart   | Done                                   |
+| Create / edit / delete movements      | Done                                   |
+| Filter movements by name and category | Done                                   |
+| View and edit user profile            | Done                                   |
+| Upload avatar (camera or gallery)     | Done                                   |
+| Offline detection alert               | Done                                   |
+| Role-based access control             | Done (Tab1 role guard commented out)   |
+| Products tab (Tab2)                   | Not implemented                        |
+| Password recovery                     | Page exists, backend logic unconfirmed |
+
+---
+
+## Project Docs
+
+- **PRD / requirements:** [`doc/PRD.md`](doc/PRD.md)
+- **Roadmap & next steps:** [`doc/PLAN.md`](doc/PLAN.md)
+- **DeepWiki:** https://deepwiki.com/MrInternauta/finnance-project (not indexed yet)
+
+Known P0 gaps (details in PRD): movements are not scoped per user (`GET /movements` is public,
+`userId` comes from the request body), only ADMIN can create movements, and movement names are
+forced globally unique, and sign-up accepts `role` from the request body.
+
+Product decisions (PRD §7): roles = super admin (`ADMIN`) + default user (`CLIENT`, auto-assigned
+at sign-up); currency **MXN only**; password reset email via **Resend**; categories = global
+defaults + user-defined.
 
 ---
 
@@ -279,12 +295,14 @@ docker-compose.override.yml  Local dev overrides (auto-merged on docker-compose 
 ```
 
 **Start backend:**
+
 ```bash
 cd backend
 docker-compose up -d
 ```
 
 Spins up:
+
 - `node_dev_finnance` — NestJS on port **3000** (debug: **9229**), hot-reload enabled
 - `postgres_dev_finnance` — PostgreSQL on port **5430** (external)
 
@@ -300,6 +318,7 @@ docker exec node_dev_finnance sh -c \
 ```
 
 **Seed default data (first time only):**
+
 ```bash
 curl -H "auth: 12345a" http://localhost:3000/api/setDefaultValues
 ```
@@ -308,17 +327,19 @@ Creates: 3 roles, 3 users, 15 categories, 5 sample movements.
 
 **Default credentials (all seeded users share the same password):**
 
-| Email | Role | Password |
-|---|---|---|
-| `admin@admin.com` | ADMIN | `1234567890` |
+| Email                 | Role       | Password     |
+| --------------------- | ---------- | ------------ |
+| `admin@admin.com`     | ADMIN      | `1234567890` |
 | `cashier@cashier.com` | CLIENT_PRO | `1234567890` |
-| `client@client.com` | CLIENT | `1234567890` |
+| `client@client.com`   | CLIENT     | `1234567890` |
 
 **Verify:**
+
 - Swagger UI: http://localhost:3000/docs
 - Login: `POST http://localhost:3000/api/auth` `{ "email": "admin@admin.com", "password": "1234567890" }`
 
 **Stop:**
+
 ```bash
 docker-compose down          # stop containers, keep DB volume
 docker-compose down -v       # stop + wipe DB volume
@@ -326,6 +347,7 @@ docker-compose down -v       # stop + wipe DB volume
 
 **Known gotcha — duplicate `devred` network:**
 If `docker-compose up` fails with `network devred is ambiguous`, remove the orphan networks:
+
 ```bash
 docker network ls --filter name=devred   # find the IDs
 docker network rm <id1> <id2>            # remove both
@@ -347,10 +369,10 @@ docker-compose up -d                     # retry
 - **Migrations path:** `backend/src/core/database/migrations/`
 - **Data source config:** `backend/src/core/database/data-source.ts`
 
-| Migration | Change |
-|---|---|
+| Migration                    | Change                      |
+| ---------------------------- | --------------------------- |
 | `1735627479683-migration.ts` | Initial schema — all tables |
-| `1747982567572-migration.ts` | `user.image` → nullable |
+| `1747982567572-migration.ts` | `user.image` → nullable     |
 
 ```bash
 # Migration commands (run from backend/)

@@ -24,7 +24,7 @@
 
 ## Description
 
-Nest store - point of sales
+Finnance — finnance-project
 
 ## Installation
 
@@ -100,8 +100,8 @@ sudo chown -R $(whoami) ~/.docker
 ❯ npx gulp --command="migrations:generate"
 ❯ npx gulp --command="migrations:run"
 
-
 ## Env config
+
 ```
 API_KEY=12345a
 
